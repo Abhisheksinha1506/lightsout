@@ -1,0 +1,57 @@
+name: lint
+
+on: push
+
+jobs:
+  golangci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - name: Run Golangci Linter
+        uses: golangci/golangci-lint-action@v9
+        with:
+          # Build golangci-lint with the Go set up above, so a new Go release
+          # can't make it fail to read the standard library. Bump this together
+          # with the golangci-lint image in dev.lint.Dockerfile.
+          install-mode: goinstall
+          version: v2.15.0
+  gomod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+        id: go
+      - run: make lint-gomod
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+      - name: Run Check
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: check
+  hadolint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Linting dev.lint.Dockerfile
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: 'dev.lint.Dockerfile'
+  in-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: make docker-lint

@@ -1,0 +1,26 @@
+name: build
+
+on: push
+
+jobs:
+  go-build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+        id: go
+      - run: make build-go
+      - run: make test-go
+  docker-dev-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+      - run: make build-docker-dev-lint

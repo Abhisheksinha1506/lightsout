@@ -1,0 +1,41 @@
+version: 2
+project_name: lightsout
+release:
+  github:
+    owner: abhisheksinha1506
+    name: lightsout
+  prerelease: auto
+before:
+  hooks:
+    - go mod download
+builds:
+  - goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - "6"
+      - "7"
+    # .Tag keeps the leading "v" so it matches GitHub's tag_name in the update check
+    ldflags:
+      - -s -w -X github.com/abhisheksinha1506/lightsout/pkg/version.Version={{.Tag}}
+homebrew_casks:
+  - repository:
+      owner: abhisheksinha1506
+      name: homebrew-tap
+    homepage: 'https://github.com/abhisheksinha1506/lightsout'
+    description: '🌙 Quit all applications with one terminal command'
+    commit_author:
+      name: abhisheksinha1506
+      email: abhisheksinha1506@gmail.com
+    # lightsout is not signed or notarized, so macOS would quarantine it and
+    # refuse to run it ("is damaged and cannot be opened"). Clear the quarantine bit.
+    hooks:
+      post:
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/lightsout"]
+          end

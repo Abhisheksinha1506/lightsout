@@ -1,0 +1,30 @@
+# Keeps Go modules, GitHub Actions and the lint Docker images up to date.
+# Each ecosystem gets one grouped pull request per week.
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      go-modules:
+        patterns:
+          - '*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      docker-images:
+        patterns:
+          - '*'
