@@ -24,6 +24,10 @@ the terminal you run it from and any apps you tell it to keep.
 brew install abhisheksinha1506/tap/lightsout
 ```
 
+While the repository is private, Homebrew needs a GitHub token that can read
+it: export `HOMEBREW_GITHUB_API_TOKEN` in your shell before installing or
+upgrading.
+
 The first time you run lightsout, macOS asks whether your terminal may control
 Finder, so it can close Finder's windows. Allow it; macOS only asks once.
 
