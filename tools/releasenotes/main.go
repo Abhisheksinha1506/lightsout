@@ -26,7 +26,14 @@ const installSteps = "### Install or upgrade\n" +
 	"brew upgrade abhisheksinha1506/tap/lightsout\n" +
 	"```\n" +
 	"\n" +
-	"On Linux or Windows, download the archive for your system below.\n"
+	"On Windows, use Scoop:\n" +
+	"\n" +
+	"```powershell\n" +
+	"scoop bucket add abhisheksinha1506 https://github.com/abhisheksinha1506/scoop-bucket\n" +
+	"scoop install abhisheksinha1506/lightsout\n" +
+	"```\n" +
+	"\n" +
+	"On Linux, install the `.deb` or `.rpm` package below. Or download the archive for your system below.\n"
 
 func main() {
 	if len(os.Args) < 2 || len(os.Args) > 3 {
