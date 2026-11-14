@@ -1,18 +1,25 @@
-<p align="center">
-  <img src="assets/logo.svg" alt="lightsout logo: a crescent moon" width="128" height="128" />
+<div align="center">
+
+<img src="assets/logo.svg" alt="lightsout logo: a crescent moon" width="128" height="128" />
+
+<h1>lightsout</h1>
+
+<p>Quit all applications with one terminal command.</p>
+
+<p>
+  <a href="https://github.com/abhisheksinha1506/lightsout/releases/latest"><img src="https://img.shields.io/github/v/release/abhisheksinha1506/lightsout" alt="Latest release" /></a>
+  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml/badge.svg" alt="build" /></a>
+  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml/badge.svg" alt="lint" /></a>
+  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml/badge.svg" alt="release" /></a>
 </p>
 
-# lightsout
+<p>
+  <a href="https://launchstall.com" target="_blank" rel="noopener"><img src="https://launchstall.com/badge.svg" alt="Featured on LaunchStall" height="44" /></a>
+  &nbsp;
+  <a href="https://megalaun.ch/" target="_blank" rel="noopener"><img src="https://megalaun.ch/badges/featured/asset" alt="Featured on MegaLaunch" height="44" /></a>
+</p>
 
-[![Latest release](https://img.shields.io/github/v/release/abhisheksinha1506/lightsout)](https://github.com/abhisheksinha1506/lightsout/releases/latest)
-[![build](https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml/badge.svg)](https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml)
-[![lint](https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml/badge.svg)](https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml)
-[![release](https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml/badge.svg)](https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml)
-
-<a href="https://launchstall.com" target="_blank" rel="noopener"><img src="https://launchstall.com/badge.svg" alt="Featured on LaunchStall" width="220" height="54" /></a>
-<a href="https://megalaun.ch/" target="_blank" rel="noopener"><img src="https://megalaun.ch/badges/featured/asset" alt="Featured on MegaLaunch" width="220" height="64" /></a>
-
-🌙 Quit all applications with one terminal command.
+</div>
 
 lightsout asks every open desktop application on macOS, Linux or Windows to
 quit, except the terminal you run it from and any apps you tell it to keep.
