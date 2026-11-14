@@ -2,32 +2,44 @@ name: build
 
 on: push
 
+permissions:
+  contents: read
+
 jobs:
   go-build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
+        # The oldest Go that go.mod allows, and the newest release.
+        go: [go.mod, stable]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: stable
-        id: go
+          go-version: ${{ matrix.go != 'go.mod' && matrix.go || '' }}
+          go-version-file: ${{ matrix.go == 'go.mod' && 'go.mod' || '' }}
       # go directly rather than make, which Windows runners don't always have
       - run: go build -v ./...
       - run: go test ./...
       - name: Open and close Notepad with the real Windows code
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.go == 'stable'
         run: go test -count=1 -v -run TestRealNotepadIsListedAndCloses ./pkg/windows/
         env:
           LIGHTSOUT_WINDOWS_E2E: '1'
+      - name: Open and quit TextEdit with the real macOS code
+        if: runner.os == 'macOS' && matrix.go == 'stable'
+        run: go test -count=1 -v -run TestRealTextEditIsListedAndQuits ./pkg/macos/
+        env:
+          LIGHTSOUT_MACOS_E2E: '1'
       # A virtual X display (Xvfb) with a window manager (openbox), which
-      # wmctrl needs to list windows.
-      - name: Open and close an xterm with the real Linux code
-        if: runner.os == 'Linux'
+      # wmctrl needs to list windows. All tests run again here with the
+      # end-to-end test on, to measure coverage of the real Linux code.
+      - name: Open and close an xterm with the real Linux code, with coverage
+        if: runner.os == 'Linux' && matrix.go == 'stable'
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q --no-install-recommends xvfb openbox wmctrl x11-utils xterm
@@ -35,13 +47,52 @@ jobs:
           for _ in $(seq 1 50); do xprop -root >/dev/null 2>&1 && break; sleep 0.2; done
           openbox &
           for _ in $(seq 1 50); do wmctrl -m >/dev/null 2>&1 && break; sleep 0.2; done
-          go test -count=1 -v -run TestRealXtermIsListedAndCloses ./pkg/linux/
+          go test -count=1 -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out | tail -1
         env:
           DISPLAY: ':99'
           LIGHTSOUT_LINUX_E2E: '1'
+      - name: Upload coverage to Codecov
+        if: runner.os == 'Linux' && matrix.go == 'stable'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage.out
+          fail_ci_if_error: false
+
+  # Builds every release file without publishing, then installs the Linux
+  # packages the way users would.
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - name: Build a snapshot release
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --snapshot --clean --skip=publish,sign,sbom
+      - name: Install the .deb on Ubuntu
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ./dist/lightsout_*_linux_amd64.deb
+          lightsout --version
+          man -w lightsout
+          test -f /usr/share/bash-completion/completions/lightsout
+      - name: Install the .rpm on Fedora
+        run: |
+          docker run --rm -v "$PWD/dist:/dist" fedora:latest \
+            sh -c 'dnf install -y -q /dist/lightsout_*_linux_amd64.rpm && lightsout --version && test -f /usr/share/zsh/site-functions/_lightsout'
+
   docker-dev-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: make build-docker-dev-lint
