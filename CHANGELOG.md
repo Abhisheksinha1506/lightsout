@@ -6,6 +6,8 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-14
+
 ### Added
 
 - lightsout detects the app you're running it from, by following its own
@@ -148,7 +150,8 @@ First release.
 - Releases for macOS and Linux built with GoReleaser, a Homebrew cask, CI, and
   Dependabot.
 
-[Unreleased]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.4...HEAD
+[Unreleased]: https://github.com/abhisheksinha1506/lightsout/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.4...v1.2.0
 [1.1.4]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.1...v1.1.2
