@@ -299,6 +299,16 @@ download came from this repository's release workflow:
 gh attestation verify lightsout_1.2.0_darwin_arm64.tar.gz --repo abhisheksinha1506/lightsout
 ```
 
+and to check the signature on the checksums file (with
+[cosign](https://docs.sigstore.dev/cosign/system_config/installation/)):
+
+```bash
+cosign verify-blob --bundle lightsout_1.2.0_checksums.txt.sigstore.json \
+  --certificate-identity-regexp '(?i)^https://github.com/abhisheksinha1506/lightsout/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  lightsout_1.2.0_checksums.txt
+```
+
 The workflow needs a `GORELEASER_PAT` secret that can write to these
 repositories and open pull requests on `microsoft/winget-pkgs`.
 

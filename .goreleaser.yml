@@ -46,7 +46,7 @@ sboms:
 # Keyless cosign signature of the checksums file, using the release
 # workflow's GitHub OIDC identity. Verify with:
 #   cosign verify-blob --bundle lightsout_<version>_checksums.txt.sigstore.json \
-#     --certificate-identity-regexp '^https://github.com/abhisheksinha1506/lightsout/' \
+#     --certificate-identity-regexp '(?i)^https://github.com/abhisheksinha1506/lightsout/' \
 #     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
 #     lightsout_<version>_checksums.txt
 signs:
