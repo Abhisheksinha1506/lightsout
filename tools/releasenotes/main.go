@@ -27,8 +27,8 @@ const installSteps = "### Install or upgrade\n" +
 	"```\n" +
 	"\n" +
 	"While the repository is private, export `HOMEBREW_GITHUB_API_TOKEN` (a token\n" +
-	"that can read it) before installing or upgrading. On Linux, download the\n" +
-	"archive for your architecture below.\n"
+	"that can read it) before installing or upgrading with Homebrew. On Linux or\n" +
+	"Windows, download the archive for your system below.\n"
 
 func main() {
 	if len(os.Args) < 2 || len(os.Args) > 3 {
