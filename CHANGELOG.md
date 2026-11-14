@@ -6,6 +6,19 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.4] - 2026-11-14
+
+### Added
+
+- `--version` (`-v`) prints the version and `--help` (`-h`) prints usage.
+
+### Fixed
+
+- An argument starting with `-` no longer starts a run. Before,
+  `lightsout --version` treated `--version` as an app name to keep open and
+  went on to ask every other app to quit. Unknown options now print an error
+  and exit with status 2.
+
 ## [1.1.3] - 2026-11-14
 
 No changes to how lightsout itself behaves.
@@ -105,7 +118,8 @@ First release.
 - Releases for macOS and Linux built with GoReleaser, a Homebrew cask, CI, and
   Dependabot.
 
-[Unreleased]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.3...HEAD
+[Unreleased]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.4...HEAD
+[1.1.4]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.0...v1.1.1

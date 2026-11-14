@@ -119,6 +119,10 @@ lightsout lists them, and quote names that contain spaces:
 lightsout Slack "Google Chrome"
 ```
 
+`lightsout --version` (or `-v`) prints the version and `lightsout --help` (or
+`-h`) prints usage; neither quits anything. Any other argument starting with
+`-` is an error, so a mistyped option never starts a run.
+
 If an app can't be quit, or is still open after 10 seconds (for example because
 it is asking you to save), lightsout prints a warning and carries on with the
 rest. At the end it lists every app it couldn't quit and exits with status 1.

@@ -22,6 +22,21 @@ import (
 //	limitsWarning()    a warning about apps lightsout can't see, or ""
 //	afterQuit()        cleanup once every app was asked to quit
 func main() {
+	keepApps, cmd, err := parseArgs(os.Args[1:])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "lightsout:", err)
+		fmt.Fprint(os.Stderr, usage)
+		os.Exit(2)
+	}
+	switch cmd {
+	case showVersion:
+		fmt.Println("lightsout", version.Version)
+		return
+	case showHelp:
+		fmt.Print(usage)
+		return
+	}
+
 	statuser.Emojis = false
 	if !platformSupported {
 		statuser.ErrorMsg("This application only works on macOS, Linux and Windows", 1)
@@ -37,7 +52,7 @@ func main() {
 	if config.Exists() {
 		ignoredApps = configContents.IgnoredApps
 	}
-	ignoredApps = append(ignoredApps, os.Args[1:]...)
+	ignoredApps = append(ignoredApps, keepApps...)
 
 	output.Title()
 
@@ -71,6 +86,45 @@ func main() {
 		statuser.ErrorMsg("Failed to quit: "+strings.Join(failed, ", "), 1)
 	}
 	statuser.Success("Quit All Applications! Have a good day :)")
+}
+
+// command is what lightsout was asked to do by its arguments.
+type command int
+
+const (
+	runQuit command = iota
+	showVersion
+	showHelp
+)
+
+const usage = `Usage: lightsout [app ...]
+
+Asks every open app to quit, except the app you run lightsout from and the
+apps named as arguments or in ~/.config/lightsout/config.yml.
+
+Options:
+  -h, --help     Show this help
+  -v, --version  Show the version
+`
+
+// parseArgs reads lightsout's command-line arguments. Arguments that don't
+// start with "-" are names of apps to keep open, returned in order with
+// runQuit. --version/-v or --help/-h anywhere returns showVersion or
+// showHelp instead. Any other argument starting with "-" is an error, so a
+// mistyped option never starts a run that quits apps.
+func parseArgs(args []string) (keep []string, cmd command, err error) {
+	for _, arg := range args {
+		switch {
+		case arg == "-v" || arg == "--version":
+			return nil, showVersion, nil
+		case arg == "-h" || arg == "--help":
+			return nil, showHelp, nil
+		case strings.HasPrefix(arg, "-"):
+			return nil, runQuit, fmt.Errorf("unknown option %q", arg)
+		}
+		keep = append(keep, arg)
+	}
+	return keep, runQuit, nil
 }
 
 // appNames returns the keys of a map from app name to its quit handles, sorted.
