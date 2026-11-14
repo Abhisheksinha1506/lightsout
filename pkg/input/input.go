@@ -13,12 +13,14 @@ import (
 	"github.com/gleich/statuser/v2"
 )
 
-// pickApp prints apps as a numbered list (starting at 1) to out and reads the
-// user's choice from in, asking again until a listed number is entered.
+// pickApp prints apps as a numbered list (starting at 1) to out, plus 0 for
+// "none of these", and reads the user's choice from in, asking again until a
+// listed number is entered.
 //
-// It returns the chosen app. It returns an error if apps is empty, if out
-// can't be written to, or if in ends or fails before a valid number is entered
-// (for example on Ctrl+D).
+// It returns the chosen app, or "" for 0: the app the user is running from is
+// not listed, for example because it is already kept open. It returns an
+// error if apps is empty, if out can't be written to, or if in ends or fails
+// before a valid number is entered (for example on Ctrl+D).
 func pickApp(in io.Reader, out io.Writer, apps []string) (string, error) {
 	if len(apps) == 0 {
 		return "", errors.New("no running apps to choose from")
@@ -29,7 +31,8 @@ func pickApp(in io.Reader, out io.Writer, apps []string) (string, error) {
 	for i, app := range apps {
 		menu.WriteString(strconv.Itoa(i+1) + ") " + app + "\n")
 	}
-	prompt := "Enter a number (1-" + strconv.Itoa(len(apps)) + "): "
+	menu.WriteString("0) None of these (the app I'm running from is already kept)\n")
+	prompt := "Enter a number (0-" + strconv.Itoa(len(apps)) + "): "
 
 	message := menu.String() + prompt
 	scanner := bufio.NewScanner(in)
@@ -44,10 +47,13 @@ func pickApp(in io.Reader, out io.Writer, apps []string) (string, error) {
 			return "", errors.New("no app chosen")
 		}
 		answer := strings.TrimSpace(scanner.Text())
-		if n, err := strconv.Atoi(answer); err == nil && n >= 1 && n <= len(apps) {
+		if n, err := strconv.Atoi(answer); err == nil && n >= 0 && n <= len(apps) {
+			if n == 0 {
+				return "", nil
+			}
 			return apps[n-1], nil
 		}
-		message = fmt.Sprintf("%q is not a number from 1 to %d.\n%s", answer, len(apps), prompt)
+		message = fmt.Sprintf("%q is not a number from 0 to %d.\n%s", answer, len(apps), prompt)
 	}
 }
 
@@ -78,7 +84,8 @@ func ExecutingTerm(runningApps, ignoredApps []string) []string {
 		}
 	}
 
-	if program == "" {
+	// With every running app already kept, there is nothing to ask about.
+	if program == "" && len(cleanedApps) > 0 {
 		var err error
 		program, err = pickApp(os.Stdin, os.Stdout, cleanedApps)
 		if err != nil {
@@ -86,8 +93,9 @@ func ExecutingTerm(runningApps, ignoredApps []string) []string {
 		}
 	}
 
-	// program is always running: it was picked from cleanedApps or detected in
-	// runningApps. It may already be missing here if it is also ignored.
+	// program is either "" (none of the listed apps), picked from cleanedApps,
+	// or detected in runningApps. It may already be missing here if it is also
+	// ignored.
 	cleanedApps2 := []string{}
 	for _, app := range cleanedApps {
 		if strings.Trim(app, "\n") != strings.Trim(program, "\n") {

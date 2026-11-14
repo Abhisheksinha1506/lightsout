@@ -10,6 +10,7 @@ import (
 
 // pickApp asks the user to type the number of the app they are running
 // lightsout from, and keeps asking until the answer is a listed number.
+// 0 means none of them, for when that app is already kept open.
 func TestPickApp(t *testing.T) {
 	apps := []string{"Mail", "Slack", "Terminal"}
 
@@ -22,7 +23,8 @@ func TestPickApp(t *testing.T) {
 	}{
 		{name: "valid number", apps: apps, input: "2\n", want: "Slack"},
 		{name: "spaces around number", apps: apps, input: "  3 \n", want: "Terminal"},
-		{name: "retries after invalid input", apps: apps, input: "abc\n0\n4\n\n1\n", want: "Mail"},
+		{name: "none of these", apps: apps, input: "0\n", want: ""},
+		{name: "retries after invalid input", apps: apps, input: "abc\n-1\n4\n\n1\n", want: "Mail"},
 		{name: "last line without newline", apps: apps, input: "3", want: "Terminal"},
 		{name: "input ends without a choice", apps: apps, input: "abc\n", wantErr: true},
 		{name: "no input at all", apps: apps, input: "", wantErr: true},
@@ -60,16 +62,29 @@ func TestPickAppStopsWhenPromptCannotBeShown(t *testing.T) {
 	}
 }
 
-// The prompt lists every app with its number, starting from 1.
+// The prompt lists every app with its number, starting from 1, plus 0 for
+// none of them.
 func TestPickAppListsNumberedApps(t *testing.T) {
 	var out strings.Builder
 	if _, err := pickApp(strings.NewReader("1\n"), &out, []string{"Mail", "Slack"}); err != nil {
 		t.Fatal(err)
 	}
-	for _, line := range []string{"1) Mail", "2) Slack"} {
+	for _, line := range []string{"1) Mail", "2) Slack", "0) None of these"} {
 		if !strings.Contains(out.String(), line) {
 			t.Errorf("prompt output missing %q:\n%s", line, out.String())
 		}
+	}
+}
+
+// When every running app is already kept open, there is nothing to quit, so
+// lightsout must not ask anything (or fail for lack of choices).
+func TestExecutingTermNothingLeftToQuit(t *testing.T) {
+	t.Setenv("TERM", "xterm-256color")
+
+	got := ExecutingTerm([]string{"Google Chrome", "Terminal"}, []string{"Google Chrome", "Terminal"})
+
+	if len(got) != 0 {
+		t.Errorf("ExecutingTerm() = %q, want no apps", got)
 	}
 }
 

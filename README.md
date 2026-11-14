@@ -57,9 +57,11 @@ lightsout
 1. lightsout lists the running applications, numbered: on macOS, the apps in
    your Dock; on Linux, the apps with open windows.
 2. It asks which app you are running it from, so it can keep that one open.
-   Type that app's number and press <kbd>Enter</kbd>. If you use
-   [kitty](https://sw.kovidgoyal.net/kitty/), lightsout detects it and skips
-   the question.
+   Type that app's number and press <kbd>Enter</kbd>. If that app isn't
+   listed because it's already in `ignoredApps`, type <kbd>0</kbd> (none of
+   these). If you use [kitty](https://sw.kovidgoyal.net/kitty/), lightsout
+   detects it and skips the question; if every app is already kept, there is
+   nothing to ask.
 3. It asks every other app to quit and waits up to 10 seconds for each. On
    macOS it also closes all Finder windows.
 
