@@ -5,6 +5,8 @@ release:
     owner: abhisheksinha1506
     name: lightsout
   prerelease: auto
+  # Release title, e.g. "lightsout v1.2.0"
+  name_template: "{{ .ProjectName }} {{ .Tag }}"
 before:
   hooks:
     - go mod download
