@@ -1,9 +1,16 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="lightsout logo: a crescent moon" width="128" height="128" />
+</p>
+
 # lightsout
 
 [![Latest release](https://img.shields.io/github/v/release/abhisheksinha1506/lightsout)](https://github.com/abhisheksinha1506/lightsout/releases/latest)
 [![build](https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml/badge.svg)](https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml)
 [![lint](https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml/badge.svg)](https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml)
 [![release](https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml/badge.svg)](https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml)
+
+<a href="https://launchstall.com" target="_blank" rel="noopener"><img src="https://launchstall.com/badge.svg" alt="Featured on LaunchStall" width="220" height="54" /></a>
+<a href="https://megalaun.ch/" target="_blank" rel="noopener"><img src="https://megalaun.ch/badges/featured/asset" alt="Featured on MegaLaunch" width="220" height="64" /></a>
 
 🌙 Quit all applications with one terminal command.
 
@@ -14,6 +21,8 @@ quit, except the terminal you run it from and any apps you tell it to keep.
 > lightsout asks apps to quit the normal way, so an app with unsaved work can
 > ask you to save first. Any app still open after 10 seconds is left running
 > and listed at the end. Nothing is force quit.
+
+![lightsout in a terminal: the LIGHTS OUT banner, a numbered list of open apps with Terminal picked as the app it runs from, then a "Quit" line for each other app](assets/screenshot.png)
 
 ## Install
 
