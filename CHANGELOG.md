@@ -6,6 +6,36 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- lightsout detects the app you're running it from, by following its own
+  parent processes, and keeps it open without asking. It still asks when it
+  can't tell, for example over SSH or inside tmux.
+- `--dry-run` (`-n`) lists the apps that would be asked to quit, and quits
+  nothing.
+- `--yes` (`-y`) never asks which app you're running from. If that app can't
+  be detected, lightsout stops without quitting anything, so it is safe to
+  run from scripts and schedules.
+- `--timeout SECS` sets how long to wait for each app to quit (1–300 seconds,
+  default 10).
+- `lightsout keep APP...` and `lightsout unkeep APP...` add and remove apps in
+  `ignoredApps`, creating the config file if needed.
+- Shell completions for bash, zsh, fish and PowerShell
+  (`lightsout completion SHELL`) and a man page, installed by Homebrew and
+  the `.deb`/`.rpm` packages.
+- Releases include SBOMs, a cosign signature for the checksums file, and
+  GitHub build provenance for every file.
+- `SECURITY.md`, issue forms, a demo GIF and a FAQ in the README.
+
+### Changed
+
+- Error messages at the end of a run start in lowercase, for example
+  "failed to quit: Slack".
+- CI tests the oldest supported Go as well as the newest, runs an end-to-end
+  test on macOS too, installs the `.deb` and `.rpm` packages, and runs
+  govulncheck, CodeQL and OpenSSF Scorecard. Every GitHub Action is pinned to
+  a commit.
+
 ## [1.1.4] - 2026-11-14
 
 ### Added

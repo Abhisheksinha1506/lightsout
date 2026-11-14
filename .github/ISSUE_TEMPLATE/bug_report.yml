@@ -1,0 +1,65 @@
+name: 🐛 Bug report
+description: Report something in lightsout that isn't working
+labels: [bug]
+assignees: [abhisheksinha1506]
+body:
+  - type: markdown
+    attributes:
+      value: Please search existing issues first; this may already be reported.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Describe the problem, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Which apps were open, the exact command you ran, and what you chose at the prompt.
+      placeholder: |
+        1. Open Slack and Mail
+        2. Run `lightsout --dry-run`
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: lightsout version
+      description: The output of `lightsout --version`.
+      placeholder: lightsout v1.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, Linux, Windows]
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS version and desktop
+      description: For Linux, include the desktop and whether it's X11 or Wayland.
+      placeholder: macOS 26.1 / Ubuntu 26.04 GNOME on X11 / Windows 11 24H2
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installed with
+      options: [Homebrew, Scoop, winget, .deb or .rpm package, Release download, go install, Built from source]
+  - type: input
+    id: terminal
+    attributes:
+      label: Terminal you ran lightsout from
+      placeholder: Terminal, iTerm2, Windows Terminal, VS Code...
+  - type: textarea
+    id: output
+    attributes:
+      label: Output and config
+      description: Paste the full output, and your ~/.config/lightsout/config.yml if you have one. Remove anything private first.
+      render: text

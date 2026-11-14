@@ -11,6 +11,9 @@
   <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml/badge.svg" alt="lint" /></a>
   <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml/badge.svg" alt="release" /></a>
+  <a href="https://codecov.io/gh/abhisheksinha1506/lightsout"><img src="https://codecov.io/gh/abhisheksinha1506/lightsout/graph/badge.svg" alt="Coverage" /></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/abhisheksinha1506/lightsout"><img src="https://api.scorecard.dev/projects/github.com/abhisheksinha1506/lightsout/badge" alt="OpenSSF Scorecard" /></a>
+  <a href="https://pkg.go.dev/github.com/abhisheksinha1506/lightsout"><img src="https://pkg.go.dev/badge/github.com/abhisheksinha1506/lightsout.svg" alt="Go Reference" /></a>
 </p>
 
 <p>
@@ -29,7 +32,7 @@ quit, except the terminal you run it from and any apps you tell it to keep.
 > ask you to save first. Any app still open after 10 seconds is left running
 > and listed at the end. Nothing is force quit.
 
-![lightsout in a terminal: the LIGHTS OUT banner, a numbered list of open apps with Terminal picked as the app it runs from, then a "Quit" line for each other app](assets/screenshot.png)
+![lightsout --dry-run in a terminal: the LIGHTS OUT banner, "Keeping Claude open (you're running lightsout from it)", then the apps that would be asked to quit, and "lightsout keep Spotify"](assets/demo.gif)
 
 ## Install
 
@@ -100,18 +103,17 @@ is skipped.
 ## Usage
 
 ```bash
-lightsout
+lightsout --dry-run   # see what would be quit, without quitting anything
+lightsout             # quit it all
 ```
 
-1. lightsout lists the running applications, numbered: on macOS, the apps in
-   your Dock; on Linux, the apps with open windows; on Windows, the apps on
-   your taskbar.
-2. It asks which app you are running it from, so it can keep that one open.
-   Type that app's number and press <kbd>Enter</kbd>. If that app isn't
-   listed because it's already in `ignoredApps`, type <kbd>0</kbd> (none of
-   these). If you use [kitty](https://sw.kovidgoyal.net/kitty/), lightsout
-   detects it and skips the question; if every app is already kept, there is
-   nothing to ask.
+1. lightsout lists the running applications: on macOS, the apps in your Dock;
+   on Linux, the apps with open windows; on Windows, the apps on your taskbar.
+2. It keeps open the app you're running it from. It finds that app by
+   following its own parent processes (your shell, then the terminal or
+   editor that started it). When it can't tell, for example over SSH or
+   inside tmux, it lists the apps and asks you to type the number of the one
+   you're in; type <kbd>0</kbd> if that app is already kept open.
 3. It asks every other app to quit and waits up to 10 seconds for each. On
    macOS it also closes all Finder windows, and on Windows all File Explorer
    windows.
@@ -119,22 +121,52 @@ lightsout
 Press <kbd>Ctrl</kbd>+<kbd>C</kbd> at the question to cancel before anything
 is quit.
 
-To keep more apps open, pass their names as arguments. Use the names exactly as
+To keep more apps open for one run, pass their names. Use the names exactly as
 lightsout lists them, and quote names that contain spaces:
 
 ```bash
 lightsout Slack "Google Chrome"
 ```
 
-`lightsout --version` (or `-v`) prints the version and `lightsout --help` (or
-`-h`) prints usage; neither quits anything. Any other argument starting with
-`-` is an error, so a mistyped option never starts a run.
+To always keep an app open, add it to your config with `keep` (and take it
+out again with `unkeep`):
 
-If an app can't be quit, or is still open after 10 seconds (for example because
-it is asking you to save), lightsout prints a warning and carries on with the
-rest. At the end it lists every app it couldn't quit and exits with status 1.
-On Windows, apps running as administrator can't be closed by a normal
-lightsout and are listed as well.
+```bash
+lightsout keep Spotify "Google Chrome"
+lightsout unkeep Spotify
+```
+
+| Option | Effect |
+| --- | --- |
+| `-n`, `--dry-run` | List the apps that would be asked to quit, and quit nothing |
+| `-y`, `--yes` | Never ask which app you're running from. If lightsout can't detect it, it stops without quitting anything, so it is safe in scripts and schedules |
+| `--timeout SECS` | Wait this long (1–300 seconds, default 10) for each app to quit |
+| `-h`, `--help` | Show usage |
+| `-v`, `--version` | Show the version |
+
+Any other argument starting with `-` is an error (exit status 2), so a
+mistyped option never starts a run.
+
+If an app can't be quit, or is still open after the timeout (for example
+because it is asking you to save), lightsout prints a warning and carries on
+with the rest. At the end it lists every app it couldn't quit and exits with
+status 1. On Windows, apps running as administrator can't be closed by a
+normal lightsout and are listed as well.
+
+### Shell completion
+
+Homebrew and the `.deb`/`.rpm` packages install completions for bash, zsh
+and fish, and a man page (`man lightsout`). Otherwise, load them yourself:
+
+```bash
+source <(lightsout completion bash)                       # bash, in ~/.bashrc
+lightsout completion zsh > "${fpath[1]}/_lightsout"       # zsh
+lightsout completion fish > ~/.config/fish/completions/lightsout.fish
+```
+
+```powershell
+lightsout completion powershell | Out-String | Invoke-Expression   # in $PROFILE
+```
 
 ## Configuration
 
@@ -161,7 +193,35 @@ ignoredUpdates: true
 | `ignoredUpdates` | boolean         | `false` | Turns off the update check.                                |
 
 If the config file exists but can't be read, lightsout stops before quitting
-anything.
+anything. `lightsout keep` and `unkeep` rewrite the file, so comments in it
+are lost.
+
+## FAQ
+
+**Will I lose unsaved work?** No. lightsout sends the same request as
+choosing Quit or clicking the close button, so apps can ask you to save. Apps
+still open after the timeout are left running and listed. Nothing is force
+quit.
+
+**Can I run it on a schedule?** Yes, with `--yes`: for example from cron,
+launchd or Task Scheduler. If lightsout can't tell which app it's running
+from, it stops without quitting anything rather than guess.
+
+**Why does macOS ask whether my terminal may control Finder?** lightsout
+closes Finder's windows with AppleScript, which macOS asks you to allow once.
+Quitting other apps needs no permission.
+
+**Does it work on Wayland?** Only for apps running through XWayland; native
+Wayland apps can't be listed by another program. lightsout warns you in a
+Wayland session.
+
+**Windows says "Windows protected your PC".** lightsout isn't code-signed
+yet, so SmartScreen warns the first time. Choose **More info**, then **Run
+anyway**.
+
+**An app running as administrator wasn't closed.** Windows doesn't let a
+normal program close an elevated one. Run lightsout as administrator, or close
+that app yourself.
 
 ## Update check
 
@@ -205,8 +265,11 @@ fail.
 [GoReleaser](https://goreleaser.com) and
 [hadolint](https://github.com/hadolint/hadolint) installed.
 
-The tests never quit any apps. Running `lightsout` does, so only run it when
-you are ready for everything to close.
+The tests never quit any apps you have open. The end-to-end tests, which
+open and close TextEdit, an xterm or Notepad, only run when
+`LIGHTSOUT_MACOS_E2E`, `LIGHTSOUT_LINUX_E2E` or `LIGHTSOUT_WINDOWS_E2E` is
+`1`, as in CI. Running `lightsout` itself does quit apps, so use
+`lightsout --dry-run` while trying changes.
 
 ## Releasing
 
@@ -219,11 +282,25 @@ publishing anything if the section is missing. Then it runs GoReleaser, which:
 - builds the binaries and publishes them as a GitHub release, with those notes,
 - stamps the tag into each binary as its version, which the update check uses,
   and
+- builds `.deb` and `.rpm` packages and an SBOM for each archive,
+- signs the checksums file with [cosign](https://github.com/sigstore/cosign)
+  (keyless, using the workflow's GitHub identity),
 - updates the Homebrew cask in
-  [abhisheksinha1506/homebrew-tap](https://github.com/abhisheksinha1506/homebrew-tap).
+  [abhisheksinha1506/homebrew-tap](https://github.com/abhisheksinha1506/homebrew-tap),
+  the Scoop bucket in
+  [abhisheksinha1506/scoop-bucket](https://github.com/abhisheksinha1506/scoop-bucket),
+  and opens a pull request to
+  [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs).
 
-The workflow needs a `GORELEASER_PAT` secret that can write to both
-repositories.
+The workflow then records build provenance for every release file. To check a
+download came from this repository's release workflow:
+
+```bash
+gh attestation verify lightsout_1.2.0_darwin_arm64.tar.gz --repo abhisheksinha1506/lightsout
+```
+
+The workflow needs a `GORELEASER_PAT` secret that can write to these
+repositories and open pull requests on `microsoft/winget-pkgs`.
 
 ## Changelog
 
