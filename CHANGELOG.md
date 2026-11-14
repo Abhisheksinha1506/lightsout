@@ -6,6 +6,8 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-14
+
 ### Changed
 
 - The repository is public, so `brew install abhisheksinha1506/tap/lightsout`
@@ -81,7 +83,8 @@ First release.
 - Releases for macOS and Linux built with GoReleaser, a Homebrew cask, CI, and
   Dependabot.
 
-[Unreleased]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/abhisheksinha1506/lightsout/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/abhisheksinha1506/lightsout/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/abhisheksinha1506/lightsout/compare/v1.0.1...v1.0.2
