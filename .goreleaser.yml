@@ -51,6 +51,34 @@ homebrew_casks:
           on_macos do
             run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/lightsout"]
           end
+# .deb and .rpm packages for Linux, attached to each release. They depend on
+# the tools lightsout uses to find and close windows.
+nfpms:
+  - package_name: lightsout
+    homepage: https://github.com/abhisheksinha1506/lightsout
+    maintainer: Abhishek Sinha <abhisheksinha1506@gmail.com>
+    description: Quit all open apps with one command, without force-killing.
+    license: MIT
+    formats: [deb, rpm]
+    dependencies:
+      - wmctrl
+    overrides:
+      deb:
+        dependencies: [wmctrl, x11-utils]
+      rpm:
+        dependencies: [wmctrl, xprop]
+# Scoop manifest for Windows, pushed to abhisheksinha1506/scoop-bucket.
+scoops:
+  - name: lightsout
+    repository:
+      owner: abhisheksinha1506
+      name: scoop-bucket
+    homepage: https://github.com/abhisheksinha1506/lightsout
+    description: Quit all open apps with one command, without force-killing.
+    license: MIT
+    commit_author:
+      name: abhisheksinha1506
+      email: abhisheksinha1506@gmail.com
 # Each release pushes a winget manifest to the fork
 # abhisheksinha1506/winget-pkgs and opens a pull request to
 # microsoft/winget-pkgs. GORELEASER_PAT must be able to push to the fork and

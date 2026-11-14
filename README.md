@@ -37,12 +37,22 @@ Finder, so it can close Finder's windows. Allow it; macOS only asks once.
 
 ### Linux
 
-Download the archive for your architecture (amd64, arm64, armv6 or armv7) from
-the [releases page](https://github.com/abhisheksinha1506/lightsout/releases),
-extract it, and put `lightsout` somewhere on your `PATH`.
+Download the `.deb` (Debian, Ubuntu) or `.rpm` (Fedora, openSUSE) package for
+your architecture from the
+[releases page](https://github.com/abhisheksinha1506/lightsout/releases) and
+install it, which also installs the `wmctrl` and `xprop` tools lightsout needs:
 
-lightsout finds windows with `wmctrl` and `xprop`, so install both. On Debian
-or Ubuntu:
+```bash
+sudo apt install ./lightsout_*_linux_amd64.deb
+```
+
+```bash
+sudo dnf install ./lightsout_*_linux_amd64.rpm
+```
+
+Or download the archive (amd64, arm64, armv6 or armv7), extract it, and put
+`lightsout` somewhere on your `PATH`. lightsout finds windows with `wmctrl`
+and `xprop`, so install both yourself in that case. On Debian or Ubuntu:
 
 ```bash
 sudo apt install wmctrl x11-utils
@@ -54,13 +64,31 @@ one.
 
 ### Windows
 
-Download the `.zip` for your architecture (amd64, or arm64 for Windows on ARM)
+With [Scoop](https://scoop.sh):
+
+```powershell
+scoop bucket add abhisheksinha1506 https://github.com/abhisheksinha1506/scoop-bucket
+scoop install abhisheksinha1506/lightsout
+```
+
+Or download the `.zip` for your architecture (amd64, or arm64 for Windows on ARM)
 from the [releases page](https://github.com/abhisheksinha1506/lightsout/releases),
 extract it, and put `lightsout.exe` in a folder on your `PATH`. Run it from Windows Terminal,
 PowerShell or Command Prompt.
 
 lightsout isn't code-signed, so Windows SmartScreen may warn the first time you
 run it. Choose **More info**, then **Run anyway**.
+
+### With Go
+
+If you have Go installed, on any of the three systems:
+
+```bash
+go install github.com/abhisheksinha1506/lightsout@latest
+```
+
+This builds from source, so the version shows as `dev` and the update check
+is skipped.
 
 ## Usage
 

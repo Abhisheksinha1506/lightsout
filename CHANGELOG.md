@@ -10,6 +10,11 @@ All notable changes to lightsout are listed here. The format follows
 
 - Each release opens a pull request to `microsoft/winget-pkgs` with the new
   version's manifest, so Windows users can install and upgrade with winget.
+- `.deb` and `.rpm` packages for Linux on each release. They install the
+  `wmctrl` and `xprop` tools lightsout needs.
+- A Scoop bucket for Windows, updated by each release:
+  `scoop bucket add abhisheksinha1506 https://github.com/abhisheksinha1506/scoop-bucket`.
+- The README explains installing with `go install`.
 
 ## [1.1.2] - 2026-11-14
 
