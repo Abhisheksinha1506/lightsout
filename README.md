@@ -1,4 +1,3 @@
-
 # lightsout
 
 [![Latest release](https://img.shields.io/github/v/release/abhisheksinha1506/lightsout)](https://github.com/abhisheksinha1506/lightsout/releases/latest)
@@ -34,8 +33,9 @@ Finder, so it can close Finder's windows. Allow it; macOS only asks once.
 ### Linux
 
 Download the archive for your architecture (amd64, arm64, armv6 or armv7) from
-the [releases page](https://github.com/abhisheksinha1506/lightsout/releases), extract it,
-and put `lightsout` somewhere on your `PATH`.
+the [releases page](https://github.com/abhisheksinha1506/lightsout/releases)
+(you need access to the repository while it is private), extract it, and put
+`lightsout` somewhere on your `PATH`.
 
 lightsout finds windows with `wmctrl` and `xprop`, so install both. On Debian
 or Ubuntu:
@@ -108,8 +108,12 @@ anything.
 
 Release builds ask GitHub for the latest version on each run and print a notice
 when a newer one is out. If GitHub can't be reached, takes longer than 5
-seconds to answer, or the check fails, lightsout carries on without it. Builds made from source skip the check. To
-turn it off, set `ignoredUpdates: true`.
+seconds to answer, or the check fails, lightsout carries on without it (with a
+warning when GitHub answered but the check failed). Builds made from source
+skip the check.
+
+While the repository is private, the check can't see its releases and warns on
+every run, so set `ignoredUpdates: true` in your config to turn it off.
 
 ## How it works
 
@@ -129,11 +133,15 @@ opens a weekly pull request for each of Go modules, GitHub Actions and the
 lint Docker images.
 
 ```bash
-make build-go     # download modules and check that lightsout builds
-make test-go      # run the tests
-make local-lint   # golangci-lint, goreleaser check, hadolint and a go.mod tidy check
-make docker-lint  # the same lint checks inside Docker, with nothing else to install
+make build-go       # download modules and check that lightsout builds
+make test-go        # run the tests
+make install-hooks  # run the tests before every commit that changes Go code
+make local-lint     # golangci-lint, goreleaser check, hadolint and a go.mod tidy check
+make docker-lint    # the same lint checks inside Docker, with nothing else to install
 ```
+
+Run `make install-hooks` once after cloning; a commit is stopped if the tests
+fail.
 
 `make local-lint` needs [golangci-lint](https://golangci-lint.run),
 [GoReleaser](https://goreleaser.com) and
@@ -144,7 +152,9 @@ you are ready for everything to close.
 
 ## Releasing
 
-Push a tag such as `v5.2.0`. The release workflow runs GoReleaser, which:
+First move the notes under "Unreleased" in [CHANGELOG.md](CHANGELOG.md) into a
+new section for the version, and commit that. Then push a tag such as
+`v1.1.0`. The release workflow runs GoReleaser, which:
 
 - builds the binaries and publishes them as a GitHub release,
 - stamps the tag into each binary as its version, which the update check uses,
@@ -154,6 +164,10 @@ Push a tag such as `v5.2.0`. The release workflow runs GoReleaser, which:
 
 The workflow needs a `GORELEASER_PAT` secret that can write to both
 repositories.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each release.
 
 ## Contributing
 
