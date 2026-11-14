@@ -5,8 +5,17 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
+
+// setHome points the user's home folder at dir for this test. os.UserHomeDir
+// reads HOME on macOS and Linux and USERPROFILE on Windows.
+func setHome(t *testing.T, dir string) {
+	t.Helper()
+	t.Setenv("HOME", dir)
+	t.Setenv("USERPROFILE", dir)
+}
 
 // writeConfig writes ~/.config/lightsout/config.yml under home with a single
 // ignored app.
@@ -26,7 +35,7 @@ func writeConfig(t *testing.T, home, ignoredApp string) {
 // and read on every call, otherwise ignoredApps is silently dropped.
 func TestRepeatedExistsStillLoadsIgnoredApps(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("HOME", home)
+	setHome(t, home)
 	writeConfig(t, home, "Slack")
 
 	for call := 1; call <= 2; call++ {
@@ -50,6 +59,11 @@ func TestExistsExitsOnStatError(t *testing.T) {
 	if os.Getenv("LIGHTSOUT_CONFIG_TEST_CHILD") == "1" {
 		Exists()
 		return
+	}
+	if runtime.GOOS == "windows" {
+		// The test makes Stat fail by using a file as a folder, which Windows
+		// reports as "not found"; the code under test is the same on every OS.
+		t.Skip("no simple way to make Stat fail with another error on Windows")
 	}
 
 	home := t.TempDir()

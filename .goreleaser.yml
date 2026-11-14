@@ -12,6 +12,7 @@ builds:
   - goos:
       - darwin
       - linux
+      - windows
     goarch:
       - amd64
       - arm
@@ -19,9 +20,18 @@ builds:
     goarm:
       - "6"
       - "7"
+    ignore:
+      # 32-bit ARM Windows is not supported.
+      - goos: windows
+        goarch: arm
     # .Tag keeps the leading "v" so it matches GitHub's tag_name in the update check
     ldflags:
       - -s -w -X github.com/abhisheksinha1506/lightsout/pkg/version.Version={{.Tag}}
+archives:
+  - format_overrides:
+      # Windows users expect .zip; macOS and Linux keep .tar.gz.
+      - goos: windows
+        formats: [zip]
 homebrew_casks:
   - repository:
       owner: abhisheksinha1506

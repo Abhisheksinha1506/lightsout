@@ -7,8 +7,8 @@
 
 🌙 Quit all applications with one terminal command.
 
-lightsout asks every open desktop application on macOS or Linux to quit, except
-the terminal you run it from and any apps you tell it to keep.
+lightsout asks every open desktop application on macOS, Linux or Windows to
+quit, except the terminal you run it from and any apps you tell it to keep.
 
 > [!NOTE]
 > lightsout asks apps to quit the normal way, so an app with unsaved work can
@@ -48,6 +48,17 @@ These tools work on X11 desktops. In a Wayland session, only apps running
 through XWayland can be seen and closed; lightsout warns you when it detects
 one.
 
+### Windows
+
+Download the `.zip` for your architecture (amd64, or arm64 for Windows on ARM)
+from the [releases page](https://github.com/abhisheksinha1506/lightsout/releases)
+(you need access to the repository while it is private), extract it, and put
+`lightsout.exe` in a folder on your `PATH`. Run it from Windows Terminal,
+PowerShell or Command Prompt.
+
+lightsout isn't code-signed, so Windows SmartScreen may warn the first time you
+run it. Choose **More info**, then **Run anyway**.
+
 ## Usage
 
 ```bash
@@ -55,7 +66,8 @@ lightsout
 ```
 
 1. lightsout lists the running applications, numbered: on macOS, the apps in
-   your Dock; on Linux, the apps with open windows.
+   your Dock; on Linux, the apps with open windows; on Windows, the apps on
+   your taskbar.
 2. It asks which app you are running it from, so it can keep that one open.
    Type that app's number and press <kbd>Enter</kbd>. If that app isn't
    listed because it's already in `ignoredApps`, type <kbd>0</kbd> (none of
@@ -63,7 +75,8 @@ lightsout
    detects it and skips the question; if every app is already kept, there is
    nothing to ask.
 3. It asks every other app to quit and waits up to 10 seconds for each. On
-   macOS it also closes all Finder windows.
+   macOS it also closes all Finder windows, and on Windows all File Explorer
+   windows.
 
 Press <kbd>Ctrl</kbd>+<kbd>C</kbd> at the question to cancel before anything
 is quit.
@@ -78,11 +91,15 @@ lightsout Slack "Google Chrome"
 If an app can't be quit, or is still open after 10 seconds (for example because
 it is asking you to save), lightsout prints a warning and carries on with the
 rest. At the end it lists every app it couldn't quit and exits with status 1.
+On Windows, apps running as administrator can't be closed by a normal
+lightsout and are listed as well.
 
 ## Configuration
 
 lightsout reads an optional config file from `~/.config/lightsout/config.yml`
-(or `config.yaml`). Create the file yourself if you need it. If your config
+(or `config.yaml`); on Windows that is
+`%USERPROFILE%\.config\lightsout\config.yml`. Create the file yourself if you
+need it. If your config
 file lives in another folder from an older release, move it here, or its
 settings won't apply.
 
@@ -121,10 +138,12 @@ every run, so set `ignoredUpdates: true` in your config to turn it off.
 | -------- | -------------------------------------------------------------------------------- | -------------------------------------------------- |
 | macOS    | Dock apps from `NSWorkspace` (JavaScript for Automation through `osascript`)     | The normal Quit request, sent to each process ID   |
 | Linux    | Windows from `wmctrl -l`, grouped by `WM_CLASS`; desktop and panel windows skipped | A close request to each of its windows (`wmctrl -i -c`) |
+| Windows  | Taskbar windows from the Win32 API, named by each program's description           | `WM_CLOSE`, the message a window's X button sends   |
 
 lightsout then waits for the app to exit (macOS) or for its windows to close
-(Linux). On macOS, Finder windows are then closed with AppleScript; Finder
-itself keeps running.
+(Linux and Windows). On macOS, Finder windows are then closed with AppleScript,
+and on Windows, File Explorer folder windows; Finder and File Explorer
+themselves keep running.
 
 ## Development
 

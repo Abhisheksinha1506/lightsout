@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -16,8 +16,14 @@ jobs:
         with:
           go-version: stable
         id: go
-      - run: make build-go
-      - run: make test-go
+      # go directly rather than make, which Windows runners don't always have
+      - run: go build -v ./...
+      - run: go test ./...
+      - name: Open and close Notepad with the real Windows code
+        if: runner.os == 'Windows'
+        run: go test -count=1 -v -run TestRealNotepadIsListedAndCloses ./pkg/windows/
+        env:
+          LIGHTSOUT_WINDOWS_E2E: '1'
   docker-dev-lint:
     runs-on: ubuntu-latest
     steps:

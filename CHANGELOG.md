@@ -8,6 +8,9 @@ All notable changes to lightsout are listed here. The format follows
 
 ### Added
 
+- Windows support. lightsout lists the apps on your taskbar, asks each to close
+  the same way as clicking its X button, and closes File Explorer windows at
+  the end. Releases include `.zip` archives for Windows on amd64 and arm64.
 - GitHub release notes are now taken from this changelog, and a release stops
   before publishing anything if its version has no section here.
 

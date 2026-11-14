@@ -3,25 +3,28 @@ package main
 import (
 	"fmt"
 	"os"
-	"runtime"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/abhisheksinha1506/lightsout/pkg/config"
 	"github.com/abhisheksinha1506/lightsout/pkg/input"
-	"github.com/abhisheksinha1506/lightsout/pkg/linux"
-	"github.com/abhisheksinha1506/lightsout/pkg/macos"
 	"github.com/abhisheksinha1506/lightsout/pkg/output"
 	"github.com/abhisheksinha1506/lightsout/pkg/version"
 	"github.com/briandowns/spinner"
 	"github.com/gleich/statuser/v2"
 )
 
+// Each supported operating system has a platform_<os>.go file providing:
+//
+//	platformSupported  true on macOS, Linux and Windows
+//	listApps()         the running apps' names, and how to quit one by name
+//	limitsWarning()    a warning about apps lightsout can't see, or ""
+//	afterQuit()        cleanup once every app was asked to quit
 func main() {
 	statuser.Emojis = false
-	operatingSystem := runtime.GOOS
-	if operatingSystem != "darwin" && operatingSystem != "linux" {
-		statuser.ErrorMsg("This application only works on macOS and linux", 1)
+	if !platformSupported {
+		statuser.ErrorMsg("This application only works on macOS, Linux and Windows", 1)
 	}
 
 	var configContents config.Conf
@@ -43,34 +46,16 @@ func main() {
 	}
 
 	// Getting running applications, and how to quit each one
-	var apps []string
-	var quit func(app string) error
 	s := spinner.New(spinner.CharSets[13], 30*time.Millisecond)
 	s.Suffix = " Getting list of applications"
 	s.Start()
-	switch operatingSystem {
-	case "darwin":
-		macApps, err := macos.Applications()
-		if err != nil {
-			statuser.Error("Failed to get macos applications", err, 1)
-		}
-		for app := range macApps {
-			apps = append(apps, app)
-		}
-		quit = func(app string) error { return macos.Quit(macApps[app]) }
-	case "linux":
-		linuxApps, err := linux.Applications()
-		if err != nil {
-			statuser.Error("Failed to get linux applications", err, 1)
-		}
-		for app := range linuxApps {
-			apps = append(apps, app)
-		}
-		quit = func(app string) error { return linux.Close(linuxApps[app]) }
-	}
+	apps, quit, err := listApps()
 	s.Stop()
-	if operatingSystem == "linux" && os.Getenv("XDG_SESSION_TYPE") == "wayland" {
-		statuser.Warning("Wayland session: only apps running through XWayland can be listed and closed.")
+	if err != nil {
+		statuser.Error("Failed to get the running applications", err, 1)
+	}
+	if warning := limitsWarning(); warning != "" {
+		statuser.Warning(warning)
 	}
 
 	// Getting executing terminal
@@ -79,15 +64,23 @@ func main() {
 
 	// Quitting applications
 	failed := quitApps(cleanedApps, quit)
-	if operatingSystem == "darwin" {
-		macos.CloseFinder()
-	}
+	afterQuit()
 
 	fmt.Println()
 	if len(failed) > 0 {
 		statuser.ErrorMsg("Failed to quit: "+strings.Join(failed, ", "), 1)
 	}
 	statuser.Success("Quit All Applications! Have a good day :)")
+}
+
+// appNames returns the keys of a map from app name to its quit handles, sorted.
+func appNames[T any](apps map[string]T) []string {
+	names := make([]string, 0, len(apps))
+	for name := range apps {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 // quitApps quits each app in order using quit, showing a spinner per app.
