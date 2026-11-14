@@ -19,12 +19,19 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version: stable
+      # Fails the release, before anything is published, if CHANGELOG.md has
+      # no section for this tag.
+      - name: Write release notes from CHANGELOG.md
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          previous=$(git describe --tags --abbrev=0 "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          go run ./tools/releasenotes "$GITHUB_REF_NAME" "$previous" > "$RUNNER_TEMP/release-notes.md"
       - name: Run goreleaser
         uses: goreleaser/goreleaser-action@v7
         if: startsWith(github.ref, 'refs/tags/')
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --clean
+          args: release --clean --release-notes ${{ runner.temp }}/release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GORELEASER_PAT }}

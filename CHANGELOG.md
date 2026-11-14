@@ -6,6 +6,11 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- GitHub release notes are now taken from this changelog, and a release stops
+  before publishing anything if its version has no section here.
+
 ## [1.0.3] - 2026-11-14
 
 No changes to how lightsout itself behaves.

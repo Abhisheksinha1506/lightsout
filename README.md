@@ -154,9 +154,11 @@ you are ready for everything to close.
 
 First move the notes under "Unreleased" in [CHANGELOG.md](CHANGELOG.md) into a
 new section for the version, and commit that. Then push a tag such as
-`v1.1.0`. The release workflow runs GoReleaser, which:
+`v1.1.0`. The release workflow first turns that CHANGELOG.md section into the
+release notes (`go run ./tools/releasenotes <tag>`), and stops before
+publishing anything if the section is missing. Then it runs GoReleaser, which:
 
-- builds the binaries and publishes them as a GitHub release,
+- builds the binaries and publishes them as a GitHub release, with those notes,
 - stamps the tag into each binary as its version, which the update check uses,
   and
 - updates the Homebrew cask in
