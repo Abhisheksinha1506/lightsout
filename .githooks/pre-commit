@@ -1,0 +1,16 @@
+#!/bin/sh
+# Runs the Go tests before each commit and aborts the commit if they fail.
+#
+# Install once per clone with `make install-hooks`. The tests run against the
+# working tree, so unstaged changes are tested too.
+
+# Commits that touch no Go code or module files (docs, CI config) skip the run.
+if ! git diff --cached --name-only --diff-filter=ACMRD | grep -qE '\.go$|^go\.(mod|sum)$'; then
+	exit 0
+fi
+
+echo "pre-commit: running go test ./..."
+if ! go test ./...; then
+	echo "pre-commit: tests failed, commit aborted." >&2
+	exit 1
+fi

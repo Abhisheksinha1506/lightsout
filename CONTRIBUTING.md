@@ -40,6 +40,9 @@ CI runs all of these on every push. Running them first saves a round trip.
 If you can't run something locally, open the pull request anyway; CI will
 show any problems.
 
+Run `make install-hooks` once after cloning, and git will run the tests before
+every commit that changes Go code, stopping the commit if they fail.
+
 The tests never quit your apps. Running `lightsout` itself does, so save your
 work before trying a change out by hand.
 

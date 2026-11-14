@@ -15,6 +15,9 @@ build-go:
 
 test-go:
 	go test ./...
+# Run the tests before every commit (see .githooks/pre-commit)
+install-hooks:
+	git config core.hooksPath .githooks
 
 #########
 # Linting
