@@ -6,6 +6,12 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The update check compares version numbers instead of text, so it only asks
+  you to update when a newer release exists. Before, any difference (including
+  running a newer or prerelease build) showed "PLEASE UPDATE".
+
 ## [1.1.1] - 2026-11-14
 
 ### Changed

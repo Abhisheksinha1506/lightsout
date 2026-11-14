@@ -42,14 +42,16 @@ func CheckForUpdate() {
 	http.DefaultClient.Timeout = updateCheckTimeout
 
 	const repoURL = "https://github.com/abhisheksinha1506/lightsout"
-	isOutdated, version, err := release.Check(Version, repoURL)
+	// release.Check's own "outdated" answer is true whenever the versions
+	// differ, even when this build is newer, so only its latest version is used.
+	_, latest, err := release.Check(Version, repoURL)
 	s.Stop()
 	if err != nil {
 		statuser.Warning("Failed to check for update, skipping:", err)
 		return
 	}
-	if isOutdated {
-		fmt.Println("\nPLEASE UPDATE TO NEW VERSION", version)
+	if newer(latest, Version) {
+		fmt.Println("\nPLEASE UPDATE TO NEW VERSION", latest)
 		fmt.Println("Get update from", repoURL, "or with your package manager")
 		fmt.Println()
 	}
