@@ -6,6 +6,12 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The repository is public, so `brew install abhisheksinha1506/tap/lightsout`
+  and release downloads no longer need a GitHub token, and the update check
+  can see new releases.
+
 ## [1.1.0] - 2026-11-14
 
 ### Added

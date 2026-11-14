@@ -26,9 +26,7 @@ const installSteps = "### Install or upgrade\n" +
 	"brew upgrade abhisheksinha1506/tap/lightsout\n" +
 	"```\n" +
 	"\n" +
-	"While the repository is private, export `HOMEBREW_GITHUB_API_TOKEN` (a token\n" +
-	"that can read it) before installing or upgrading with Homebrew. On Linux or\n" +
-	"Windows, download the archive for your system below.\n"
+	"On Linux or Windows, download the archive for your system below.\n"
 
 func main() {
 	if len(os.Args) < 2 || len(os.Args) > 3 {

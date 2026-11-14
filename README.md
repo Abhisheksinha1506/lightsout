@@ -23,19 +23,14 @@ quit, except the terminal you run it from and any apps you tell it to keep.
 brew install abhisheksinha1506/tap/lightsout
 ```
 
-While the repository is private, Homebrew needs a GitHub token that can read
-it: export `HOMEBREW_GITHUB_API_TOKEN` in your shell before installing or
-upgrading.
-
 The first time you run lightsout, macOS asks whether your terminal may control
 Finder, so it can close Finder's windows. Allow it; macOS only asks once.
 
 ### Linux
 
 Download the archive for your architecture (amd64, arm64, armv6 or armv7) from
-the [releases page](https://github.com/abhisheksinha1506/lightsout/releases)
-(you need access to the repository while it is private), extract it, and put
-`lightsout` somewhere on your `PATH`.
+the [releases page](https://github.com/abhisheksinha1506/lightsout/releases),
+extract it, and put `lightsout` somewhere on your `PATH`.
 
 lightsout finds windows with `wmctrl` and `xprop`, so install both. On Debian
 or Ubuntu:
@@ -51,9 +46,8 @@ one.
 ### Windows
 
 Download the `.zip` for your architecture (amd64, or arm64 for Windows on ARM)
-from the [releases page](https://github.com/abhisheksinha1506/lightsout/releases)
-(you need access to the repository while it is private), extract it, and put
-`lightsout.exe` in a folder on your `PATH`. Run it from Windows Terminal,
+from the [releases page](https://github.com/abhisheksinha1506/lightsout/releases),
+extract it, and put `lightsout.exe` in a folder on your `PATH`. Run it from Windows Terminal,
 PowerShell or Command Prompt.
 
 lightsout isn't code-signed, so Windows SmartScreen may warn the first time you
@@ -127,10 +121,7 @@ Release builds ask GitHub for the latest version on each run and print a notice
 when a newer one is out. If GitHub can't be reached, takes longer than 5
 seconds to answer, or the check fails, lightsout carries on without it (with a
 warning when GitHub answered but the check failed). Builds made from source
-skip the check.
-
-While the repository is private, the check can't see its releases and warns on
-every run, so set `ignoredUpdates: true` in your config to turn it off.
+skip the check. To turn it off, set `ignoredUpdates: true`.
 
 ## How it works
 
