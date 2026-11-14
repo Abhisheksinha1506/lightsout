@@ -2,7 +2,8 @@ package output
 
 import "github.com/wayneashleyberry/truecolor/pkg/color"
 
-// Output the application title
+// Title prints the LIGHTS OUT banner to standard output, shaded from red to
+// orange.
 func Title() {
 	title := []string{
 		"  ██╗     ██╗ ██████╗ ██╗  ██╗████████╗███████╗    ██████╗ ██╗   ██╗████████╗",

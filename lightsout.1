@@ -1,0 +1,96 @@
+.TH LIGHTSOUT 1 "2026-11-14" "lightsout" "User Commands"
+.SH NAME
+lightsout \- politely quit every open app with one command
+.SH SYNOPSIS
+.B lightsout
+.RI [ options ] " " [ app " ...]"
+.br
+.B lightsout keep
+.IR app " ..."
+.br
+.B lightsout unkeep
+.IR app " ..."
+.br
+.B lightsout completion
+.IR shell
+.SH DESCRIPTION
+.B lightsout
+asks every open app to quit, the same way as choosing Quit or clicking an
+app's close button, so apps with unsaved work can ask you to save first.
+It never force quits: an app still open after the timeout is left running
+and listed at the end, and
+.B lightsout
+exits with status 1.
+.PP
+It keeps open the app you run it from, which it detects from its parent
+processes (and asks about when it can't tell), plus the apps named as
+arguments or in the config file.
+.PP
+On macOS it quits the apps in the Dock and closes Finder windows. On Linux
+(X11) it closes the windows of each app with
+.BR wmctrl (1).
+On Windows it closes the apps on the taskbar and File Explorer windows.
+.SH OPTIONS
+.TP
+.BR \-n ", " \-\-dry\-run
+Show which apps would be asked to quit, without quitting anything.
+.TP
+.BR \-y ", " \-\-yes
+Don't ask which app you are running from. If it can't be detected,
+.B lightsout
+stops without quitting anything.
+.TP
+.BI \-\-timeout " seconds"
+How long to wait for each app to quit, from 1 to 300 seconds. The default
+is 10.
+.TP
+.BR \-h ", " \-\-help
+Show usage and exit.
+.TP
+.BR \-v ", " \-\-version
+Show the version and exit.
+.PP
+Any other argument starting with
+.B \-
+is an error (exit status 2), so a mistyped option never quits anything.
+.SH COMMANDS
+.TP
+.BI keep " app ..."
+Add apps to
+.B ignoredApps
+in the config file, so they are always kept open.
+.TP
+.BI unkeep " app ..."
+Remove apps from
+.BR ignoredApps .
+.TP
+.BI completion " shell"
+Print a completion script for
+.BR bash ", " zsh ", " fish " or " powershell .
+.SH FILES
+.TP
+.I ~/.config/lightsout/config.yml
+YAML with
+.B ignoredApps
+(a list of app names to always keep open) and
+.B ignoredUpdates
+(true to skip the update check).
+.B keep
+and
+.B unkeep
+rewrite this file, so comments in it are lost.
+.SH EXIT STATUS
+0 when every app quit (or for a dry run), 1 when an app is still open or
+apps couldn't be listed, 2 for invalid arguments.
+.SH EXAMPLES
+.TP
+.B lightsout \-\-dry\-run
+See what would be quit.
+.TP
+.B lightsout Slack \(dqGoogle Chrome\(dq
+Quit everything except Slack and Google Chrome.
+.TP
+.B lightsout keep Spotify
+Never quit Spotify.
+.SH SEE ALSO
+https://github.com/abhisheksinha1506/lightsout

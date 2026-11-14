@@ -18,9 +18,7 @@ const (
 	// loginwindow, which must never be quit.
 	regularPolicy = 0
 	finderBundle  = "com.apple.finder"
-	// quitTimeout is how long Quit waits for an app to exit.
-	quitTimeout  = 10 * time.Second
-	pollInterval = 100 * time.Millisecond
+	pollInterval  = 100 * time.Millisecond
 )
 
 type runningApp struct {

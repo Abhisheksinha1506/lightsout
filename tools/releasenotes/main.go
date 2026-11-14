@@ -12,6 +12,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -36,26 +37,33 @@ const installSteps = "### Install or upgrade\n" +
 	"On Linux, install the `.deb` or `.rpm` package below. Or download the archive for your system below.\n"
 
 func main() {
-	if len(os.Args) < 2 || len(os.Args) > 3 {
-		fmt.Fprintln(os.Stderr, "usage: releasenotes <tag> [previous-tag]")
-		os.Exit(2)
+	if err := run(os.Args[1:], os.ReadFile, os.Stdout); err != nil {
+		fmt.Fprintln(os.Stderr, "releasenotes:", err)
+		os.Exit(1)
+	}
+}
+
+// run prints the release notes for args (<tag> [previous-tag]) to out,
+// reading CHANGELOG.md with readFile.
+func run(args []string, readFile func(string) ([]byte, error), out io.Writer) error {
+	if len(args) < 1 || len(args) > 2 {
+		return errors.New("usage: releasenotes <tag> [previous-tag]")
 	}
 	previous := ""
-	if len(os.Args) == 3 {
-		previous = os.Args[2]
+	if len(args) == 2 {
+		previous = args[1]
 	}
 
-	changelog, err := os.ReadFile("CHANGELOG.md")
+	changelog, err := readFile("CHANGELOG.md")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "releasenotes:", err)
-		os.Exit(1)
+		return err
 	}
-	notes, err := releaseNotes(string(changelog), os.Args[1], previous)
+	notes, err := releaseNotes(string(changelog), args[0], previous)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "releasenotes:", err)
-		os.Exit(1)
+		return err
 	}
-	fmt.Print(notes)
+	_, err = io.WriteString(out, notes)
+	return err
 }
 
 // releaseNotes returns the release notes for tag (for example "v1.0.4"): the

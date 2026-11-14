@@ -35,7 +35,7 @@ func TestRealNotepadIsListedAndCloses(t *testing.T) {
 		}
 		for name, h := range apps {
 			if strings.Contains(strings.ToLower(name), "notepad") {
-				handles = h
+				handles = h.Windows
 				return true
 			}
 		}
@@ -50,7 +50,7 @@ func TestRealNotepadIsListedAndCloses(t *testing.T) {
 		t.Fatalf("Notepad not listed after 15s; listed apps: %q (err %v)", names, err)
 	}
 
-	if err := Close(handles); err != nil {
+	if err := Close(handles, 10*time.Second); err != nil {
 		t.Fatalf("Close(%v) = %v", handles, err)
 	}
 }

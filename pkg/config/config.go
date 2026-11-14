@@ -13,13 +13,14 @@ const configDir = "/.config/lightsout/"
 // Full config file path, set by Exists and read by Read
 var path string
 
-// Config for lightsout
+// Conf is the contents of the config file.
 type Conf struct {
-	IgnoreUpdates bool     `yaml:"ignoredUpdates"`
+	IgnoreUpdates bool     `yaml:"ignoredUpdates,omitempty"`
 	IgnoredApps   []string `yaml:"ignoredApps"`
 }
 
-// Check if the config exists
+// Exists reports whether a config file exists, and remembers its path for
+// Read. It exits lightsout if the home folder or the file can't be checked.
 func Exists() bool {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -44,7 +45,8 @@ func Exists() bool {
 	return false
 }
 
-// Read from the config file
+// Read reads the config file found by Exists into conf. It exits lightsout
+// if the file can't be read or isn't valid YAML.
 func Read(conf *Conf) *Conf {
 	contents, err := os.ReadFile(path)
 	if err != nil {

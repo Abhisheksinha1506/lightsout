@@ -4,25 +4,28 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/abhisheksinha1506/lightsout/pkg/wait"
 )
 
-const (
-	// closeTimeout is how long Close waits for an app's windows to go away.
-	closeTimeout = 10 * time.Second
-	pollInterval = 100 * time.Millisecond
-)
+const pollInterval = 100 * time.Millisecond
+
+// App is one app with open windows.
+type App struct {
+	Windows []string // window IDs
+	PIDs    []int    // process IDs that own the windows, where known
+}
 
 // Applications returns the apps with open windows, as a map from each
-// window's WM_CLASS class name to the IDs of that app's windows.
+// window's WM_CLASS class name to that app's windows and process IDs.
 //
 // Desktop and panel windows are skipped, as are windows without a WM_CLASS.
 // It needs the wmctrl and xprop tools, and only sees X11 windows (including
 // XWayland), not native Wayland ones.
-func Applications() (map[string][]string, error) {
+func Applications() (map[string]App, error) {
 	for _, tool := range []string{"wmctrl", "xprop"} {
 		if _, err := exec.LookPath(tool); err != nil {
 			return nil, fmt.Errorf("%s is required to list apps; install it with your package manager", tool)
@@ -33,26 +36,33 @@ func Applications() (map[string][]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	apps := map[string][]string{}
+	apps := map[string]App{}
 	for _, id := range ids {
-		out, err := exec.Command("xprop", "-id", id, "WM_CLASS", "_NET_WM_WINDOW_TYPE").Output()
+		out, err := exec.Command("xprop", "-id", id, "WM_CLASS", "_NET_WM_WINDOW_TYPE", "_NET_WM_PID").Output()
 		if err != nil {
 			continue // the window closed while we were listing
 		}
-		if class, ok := parseXprop(string(out)); ok {
-			apps[class] = append(apps[class], id)
+		class, pid, ok := parseXprop(string(out))
+		if !ok {
+			continue
 		}
+		app := apps[class]
+		app.Windows = append(app.Windows, id)
+		if pid > 0 {
+			app.PIDs = append(app.PIDs, pid)
+		}
+		apps[class] = app
 	}
 	return apps, nil
 }
 
 // Close asks each window in windowIDs to close, as if the user clicked its
-// close button, then waits up to closeTimeout for all of them to go away.
+// close button, then waits up to timeout for all of them to go away.
 //
 // It never kills a process: a window that stays open, for example because the
 // app is asking the user to save, is left alone and reported as an error.
-func Close(windowIDs []string) error {
-	return closeWindows(windowIDs, requestClose, openWindowIDs, closeTimeout)
+func Close(windowIDs []string, timeout time.Duration) error {
+	return closeWindows(windowIDs, requestClose, openWindowIDs, timeout)
 }
 
 // closeWindows is Close with the close request, the window listing and the
@@ -111,12 +121,13 @@ func parseWindowIDs(out string) []string {
 	return ids
 }
 
-// parseXprop reads `xprop -id <id> WM_CLASS _NET_WM_WINDOW_TYPE` output and
-// returns the window's class name, the last quoted WM_CLASS value.
+// parseXprop reads `xprop -id <id> WM_CLASS _NET_WM_WINDOW_TYPE _NET_WM_PID`
+// output and returns the window's class name (the last quoted WM_CLASS
+// value) and the process ID that owns it, or 0 if the window doesn't say.
 //
 // ok is false for windows to leave alone: no WM_CLASS, or a desktop or dock
 // (panel) window type.
-func parseXprop(out string) (class string, ok bool) {
+func parseXprop(out string) (class string, pid int, ok bool) {
 	for _, line := range strings.Split(out, "\n") {
 		switch {
 		case strings.HasPrefix(line, "WM_CLASS("):
@@ -128,9 +139,14 @@ func parseXprop(out string) (class string, ok bool) {
 			}
 		case strings.HasPrefix(line, "_NET_WM_WINDOW_TYPE("):
 			if strings.Contains(line, "_NET_WM_WINDOW_TYPE_DESKTOP") || strings.Contains(line, "_NET_WM_WINDOW_TYPE_DOCK") {
-				return "", false
+				return "", 0, false
+			}
+		case strings.HasPrefix(line, "_NET_WM_PID("):
+			// _NET_WM_PID(CARDINAL) = 1234
+			if _, value, found := strings.Cut(line, "= "); found {
+				pid, _ = strconv.Atoi(strings.TrimSpace(value))
 			}
 		}
 	}
-	return class, class != ""
+	return class, pid, class != ""
 }

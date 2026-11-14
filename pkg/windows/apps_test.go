@@ -80,19 +80,19 @@ func TestAppName(t *testing.T) {
 func TestGroupApps(t *testing.T) {
 	chrome := `C:\Program Files\Google\Chrome\Application\chrome.exe`
 	windows := []window{
-		{Handle: 10, Title: "Inbox", Exe: chrome, Description: "Google Chrome", Visible: true},
+		{Handle: 10, PID: 100, Title: "Inbox", Exe: chrome, Description: "Google Chrome", Visible: true},
 		{Handle: 11, Title: "Docs", Exe: `C:\Windows\explorer.exe`, Class: "CabinetWClass", Description: "Windows Explorer", Visible: true},
-		{Handle: 12, Title: "News", Exe: chrome, Description: "Google Chrome", Visible: true},
+		{Handle: 12, PID: 100, Title: "News", Exe: chrome, Description: "Google Chrome", Visible: true},
 		{Handle: 13, Title: "Save as", Exe: chrome, Description: "Google Chrome", Visible: true, Owned: true},
-		{Handle: 14, Title: "Untitled - Notepad", Exe: `C:\Windows\notepad.exe`, Description: "Notepad", Visible: true},
+		{Handle: 14, PID: 200, Title: "Untitled - Notepad", Exe: `C:\Windows\notepad.exe`, Description: "Notepad", Visible: true},
 		{Handle: 15, Title: "Program Manager", Exe: `C:\Windows\explorer.exe`, Class: "Progman", Visible: true},
 	}
 
 	got := groupApps(windows)
 
-	want := map[string][]uintptr{
-		"Google Chrome": {10, 12},
-		"Notepad":       {14},
+	want := map[string]App{
+		"Google Chrome": {Windows: []uintptr{10, 12}, PIDs: []int{100, 100}},
+		"Notepad":       {Windows: []uintptr{14}, PIDs: []int{200}},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("groupApps() = %v, want %v", got, want)

@@ -1,20 +1,33 @@
 package main
 
-import "github.com/abhisheksinha1506/lightsout/pkg/macos"
+import (
+	"os"
+	"time"
+
+	"github.com/abhisheksinha1506/lightsout/pkg/macos"
+	"github.com/abhisheksinha1506/lightsout/pkg/proc"
+)
 
 const platformSupported = true
 
-// listApps returns the apps in the Dock and quits one by asking each of its
-// processes to quit.
-func listApps() ([]string, func(app string) error, error) {
-	apps, err := macos.Applications()
-	if err != nil {
-		return nil, nil, err
+// newPlatform lists the apps in the Dock, quits one by asking each of its
+// processes to quit, and closes all Finder windows at the end (Finder itself
+// keeps running).
+func newPlatform() platform {
+	var running map[string][]int
+	return platform{
+		list: func() ([]app, error) {
+			var err error
+			running, err = macos.Applications()
+			apps := make([]app, 0, len(running))
+			for name, pids := range running {
+				apps = append(apps, app{name: name, pids: pids})
+			}
+			return apps, err
+		},
+		quit:          func(name string, timeout time.Duration) error { return macos.Quit(running[name], timeout) },
+		afterQuit:     macos.CloseFinder,
+		afterQuitNote: "close all Finder windows",
+		ancestors:     proc.Ancestors(os.Getpid(), proc.ParentPID),
 	}
-	return appNames(apps), func(app string) error { return macos.Quit(apps[app]) }, nil
 }
-
-func limitsWarning() string { return "" }
-
-// afterQuit closes all Finder windows; Finder itself keeps running.
-func afterQuit() { macos.CloseFinder() }

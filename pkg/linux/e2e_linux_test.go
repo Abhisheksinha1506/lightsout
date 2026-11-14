@@ -35,7 +35,7 @@ func TestRealXtermIsListedAndCloses(t *testing.T) {
 		if err != nil {
 			return false
 		}
-		windows = apps["XTerm"]
+		windows = apps["XTerm"].Windows
 		return len(windows) > 0
 	})
 	if !found {
@@ -43,7 +43,7 @@ func TestRealXtermIsListedAndCloses(t *testing.T) {
 		t.Fatalf("XTerm not listed after 15s; listed apps: %v (err %v)", apps, err)
 	}
 
-	if err := Close(windows); err != nil {
+	if err := Close(windows, 10*time.Second); err != nil {
 		t.Fatalf("Close(%v) = %v", windows, err)
 	}
 	select {

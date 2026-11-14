@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"io"
 	"strings"
 	"testing"
 )
@@ -95,5 +97,33 @@ func TestReleaseNotesErrors(t *testing.T) {
 				t.Fatalf("releaseNotes(%q) = %q, want an error", tt.tag, got)
 			}
 		})
+	}
+}
+
+// run reads CHANGELOG.md and prints the notes, and rejects bad arguments or
+// an unreadable changelog.
+func TestRun(t *testing.T) {
+	notes := "# Changelog\n\n## [1.2.0] - 2026-01-01\n\n- New thing.\n"
+	read := func(string) ([]byte, error) { return []byte(notes), nil }
+
+	var out strings.Builder
+	if err := run([]string{"v1.2.0", "v1.1.0"}, read, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "- New thing.") || !strings.Contains(out.String(), "v1.1.0...v1.2.0") {
+		t.Errorf("run() output:\n%s", out.String())
+	}
+
+	for _, args := range [][]string{nil, {"a", "b", "c"}} {
+		if err := run(args, read, io.Discard); err == nil {
+			t.Errorf("run(%q) = nil error, want usage error", args)
+		}
+	}
+	failRead := func(string) ([]byte, error) { return nil, errors.New("no file") }
+	if err := run([]string{"v1.2.0"}, failRead, io.Discard); err == nil {
+		t.Error("run() with unreadable changelog = nil error")
+	}
+	if err := run([]string{"v9.9.9"}, read, io.Discard); err == nil {
+		t.Error("run() for a missing version = nil error")
 	}
 }

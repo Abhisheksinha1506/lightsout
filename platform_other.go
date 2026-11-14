@@ -7,10 +7,9 @@ import "errors"
 // lightsout doesn't support this operating system; main exits early.
 const platformSupported = false
 
-func listApps() ([]string, func(app string) error, error) {
-	return nil, nil, errors.New("unsupported operating system")
+func newPlatform() platform {
+	return platform{
+		list:      func() ([]app, error) { return nil, errors.New("unsupported operating system") },
+		afterQuit: func() {},
+	}
 }
-
-func limitsWarning() string { return "" }
-
-func afterQuit() {}

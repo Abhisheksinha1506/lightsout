@@ -1,0 +1,20 @@
+#compdef lightsout
+# zsh completion for lightsout
+
+_lightsout() {
+	if (( CURRENT == 2 )); then
+		_alternative \
+			'commands:command:((keep\:"always keep apps open" unkeep\:"stop always keeping apps open" completion\:"print a completion script"))' \
+			'options:option:((--dry-run\:"show what would be quit" --yes\:"do not ask which app you are running from" --timeout\:"seconds to wait for each app" --help\:"show help" --version\:"show the version"))'
+		return
+	fi
+	case $words[2] in
+		completion) _values 'shell' bash zsh fish powershell ;;
+		keep|unkeep) ;;
+		*) _arguments '(-n --dry-run)'{-n,--dry-run}'[show what would be quit]' \
+			'(-y --yes)'{-y,--yes}'[do not ask which app you are running from]' \
+			'--timeout[seconds to wait for each app]:seconds:' ;;
+	esac
+}
+
+_lightsout "$@"

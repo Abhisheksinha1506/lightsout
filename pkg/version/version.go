@@ -24,9 +24,9 @@ const devVersion = "dev"
 // updateCheckTimeout is the longest each update-check request may take.
 var updateCheckTimeout = 5 * time.Second
 
-// Check for an update for the CLI. Dev builds are not a release, so they skip
-// the check. A failed check only prints a warning so that lightsout still runs
-// when GitHub is unreachable or rate limited.
+// CheckForUpdate checks GitHub for a newer release. Dev builds are not a
+// release, so they skip the check. A failed check only prints a warning so
+// that lightsout still runs when GitHub is unreachable or rate limited.
 func CheckForUpdate() {
 	if Version == devVersion {
 		return

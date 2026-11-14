@@ -76,38 +76,20 @@ func TestPickAppListsNumberedApps(t *testing.T) {
 	}
 }
 
-// When every running app is already kept open, there is nothing to quit, so
-// lightsout must not ask anything (or fail for lack of choices).
-func TestExecutingTermNothingLeftToQuit(t *testing.T) {
-	t.Setenv("TERM", "xterm-256color")
-
-	got := ExecutingTerm([]string{"Google Chrome", "Terminal"}, []string{"Google Chrome", "Terminal"})
-
-	if len(got) != 0 {
-		t.Errorf("ExecutingTerm() = %q, want no apps", got)
+// Without drops kept apps and sorts the rest.
+func TestWithout(t *testing.T) {
+	got := Without([]string{"Slack", "Terminal", "Mail", "Google Chrome"}, []string{"Google Chrome", "Terminal\n", "Zoom"})
+	if want := []string{"Mail", "Slack"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("Without() = %q, want %q", got, want)
+	}
+	if got := Without([]string{"A"}, []string{"A"}); len(got) != 0 {
+		t.Errorf("Without(all kept) = %q, want none", got)
 	}
 }
 
-// When run from kitty, kitty is auto-detected and kept open, whether or not
-// it is also in the ignore list. An ignored kitty used to fail with
-// "kitty is not open" even though it was running.
-func TestExecutingTermKittyAutoDetected(t *testing.T) {
-	t.Setenv("TERM", "xterm-kitty")
-	running := []string{"Slack", "kitty", "Mail"}
-
-	tests := []struct {
-		name    string
-		ignored []string
-	}{
-		{name: "kitty not ignored", ignored: nil},
-		{name: "kitty ignored", ignored: []string{"kitty"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := ExecutingTerm(running, tt.ignored)
-			if want := []string{"Mail", "Slack"}; !reflect.DeepEqual(got, want) {
-				t.Errorf("ExecutingTerm() = %q, want %q", got, want)
-			}
-		})
+// PickApp is pickApp for callers outside the package.
+func TestPickAppExported(t *testing.T) {
+	if got, err := PickApp(strings.NewReader("2\n"), io.Discard, []string{"Mail", "Slack"}); err != nil || got != "Slack" {
+		t.Errorf("PickApp() = %q, %v; want \"Slack\", nil", got, err)
 	}
 }

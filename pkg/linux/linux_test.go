@@ -62,7 +62,7 @@ func TestParseXprop(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			class, ok := parseXprop(tt.out)
+			class, _, ok := parseXprop(tt.out)
 			if ok != tt.wantOK || class != tt.wantClass {
 				t.Errorf("parseXprop() = (%q, %v), want (%q, %v)", class, ok, tt.wantClass, tt.wantOK)
 			}
@@ -131,5 +131,17 @@ func TestCloseWindows(t *testing.T) {
 				t.Errorf("requested close for %q, want %q", requested, tt.wantRequested)
 			}
 		})
+	}
+}
+
+// The owning process ID comes from _NET_WM_PID, when the window sets it.
+func TestParseXpropPID(t *testing.T) {
+	out := "WM_CLASS(STRING) = \"xterm\", \"XTerm\"\n_NET_WM_WINDOW_TYPE(ATOM) = _NET_WM_WINDOW_TYPE_NORMAL\n_NET_WM_PID(CARDINAL) = 4242\n"
+	if class, pid, ok := parseXprop(out); class != "XTerm" || pid != 4242 || !ok {
+		t.Errorf("parseXprop() = (%q, %d, %v), want (\"XTerm\", 4242, true)", class, pid, ok)
+	}
+	noPID := "WM_CLASS(STRING) = \"a\", \"A\"\n_NET_WM_PID:  not found.\n"
+	if _, pid, ok := parseXprop(noPID); pid != 0 || !ok {
+		t.Errorf("parseXprop(no pid) = (%d, %v), want (0, true)", pid, ok)
 	}
 }

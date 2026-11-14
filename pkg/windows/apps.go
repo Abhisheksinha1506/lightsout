@@ -14,8 +14,6 @@ import (
 )
 
 const (
-	// closeTimeout is how long Close waits for an app's windows to go away.
-	closeTimeout = 10 * time.Second
 	pollInterval = 100 * time.Millisecond
 
 	explorerExe   = "explorer.exe"
@@ -31,9 +29,16 @@ var shellClasses = map[string]bool{
 	"Shell_SecondaryTrayWnd": true,
 }
 
+// App is one app on the taskbar.
+type App struct {
+	Windows []uintptr // window handles, in window order
+	PIDs    []int     // process IDs that own the windows
+}
+
 // window describes one top-level window, as read from Windows.
 type window struct {
 	Handle      uintptr
+	PID         int
 	Title       string
 	Class       string
 	Exe         string // full path of the owning process's executable, "" if unreadable
@@ -79,15 +84,20 @@ func exeName(path string) string {
 }
 
 // groupApps returns the apps on the taskbar, except File Explorer, as a map
-// from app name to the handles of that app's windows, in window order.
-func groupApps(windows []window) map[string][]uintptr {
-	apps := map[string][]uintptr{}
+// from app name to that app's windows (in window order) and process IDs.
+func groupApps(windows []window) map[string]App {
+	apps := map[string]App{}
 	for _, w := range windows {
 		if !onTaskbar(w) || exeName(w.Exe) == explorerExe {
 			continue
 		}
 		name := appName(w)
-		apps[name] = append(apps[name], w.Handle)
+		app := apps[name]
+		app.Windows = append(app.Windows, w.Handle)
+		if w.PID > 0 {
+			app.PIDs = append(app.PIDs, w.PID)
+		}
+		apps[name] = app
 	}
 	return apps
 }

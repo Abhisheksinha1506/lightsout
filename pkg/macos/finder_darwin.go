@@ -8,7 +8,7 @@ import (
 	"github.com/gleich/statuser/v2"
 )
 
-// Close all open finder windows. A failure only prints a warning, so the
+// CloseFinder closes all open Finder windows. A failure only prints a warning, so the
 // summary of apps that could not be quit is still shown afterwards.
 func CloseFinder() {
 	s := spinner.New(spinner.CharSets[13], 30*time.Millisecond)

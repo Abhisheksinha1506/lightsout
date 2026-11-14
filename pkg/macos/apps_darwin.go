@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 // appListScript prints every running app as a JSON array of
@@ -47,12 +48,12 @@ func Applications() (map[string][]int, error) {
 }
 
 // Quit asks each process in pids to quit, as if the user chose Quit from the
-// app's menu, then waits up to quitTimeout for all of them to exit.
+// app's menu, then waits up to timeout for all of them to exit.
 //
 // It never force quits: an app that stays open, for example because it is
 // asking the user to save, is left running and reported as an error.
-func Quit(pids []int) error {
-	return quit(pids, requestQuit, isRunning, quitTimeout)
+func Quit(pids []int, timeout time.Duration) error {
+	return quit(pids, requestQuit, isRunning, timeout)
 }
 
 // requestQuit sends one quit request through quitScript. The process ID is

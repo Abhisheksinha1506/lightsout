@@ -5,12 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/gleich/statuser/v2"
 )
 
 // pickApp prints apps as a numbered list (starting at 1) to out, plus 0 for
@@ -57,50 +54,26 @@ func pickApp(in io.Reader, out io.Writer, apps []string) (string, error) {
 	}
 }
 
-// Ask the user what terminal they are executing from
-func ExecutingTerm(runningApps, ignoredApps []string) []string {
-	cleanedApps := []string{}
+// PickApp asks which of apps lightsout is running from, reading the answer
+// from in and writing the question to out. It returns "" if the user chose
+// none of them. See pickApp for the errors it returns.
+func PickApp(in io.Reader, out io.Writer, apps []string) (string, error) {
+	return pickApp(in, out, apps)
+}
 
-	// Removing ignored applications
-	for _, app := range runningApps {
-		var isIgnored bool
-		for _, ignoredApp := range ignoredApps {
-			if strings.Trim(app, "\n") == strings.Trim(ignoredApp, "\n") {
-				isIgnored = true
-			}
-		}
-		if !isIgnored {
-			cleanedApps = append(cleanedApps, app)
+// Without returns apps minus every name in remove, sorted. Names are compared
+// exactly, ignoring surrounding newlines.
+func Without(apps, remove []string) []string {
+	removed := map[string]bool{}
+	for _, name := range remove {
+		removed[strings.Trim(name, "\n")] = true
+	}
+	kept := []string{}
+	for _, app := range apps {
+		if !removed[strings.Trim(app, "\n")] {
+			kept = append(kept, app)
 		}
 	}
-	sort.Strings(cleanedApps)
-
-	// Automatically select terminal as kitty if $TERM is xterm-kitty
-	var program string
-	for _, app := range runningApps {
-		if app == "kitty" && os.Getenv("TERM") == "xterm-kitty" {
-			statuser.Success("Kitty terminal automatically detected")
-			program = "kitty"
-		}
-	}
-
-	// With every running app already kept, there is nothing to ask about.
-	if program == "" && len(cleanedApps) > 0 {
-		var err error
-		program, err = pickApp(os.Stdin, os.Stdout, cleanedApps)
-		if err != nil {
-			statuser.Error("Failed to get running terminal", err, 1)
-		}
-	}
-
-	// program is either "" (none of the listed apps), picked from cleanedApps,
-	// or detected in runningApps. It may already be missing here if it is also
-	// ignored.
-	cleanedApps2 := []string{}
-	for _, app := range cleanedApps {
-		if strings.Trim(app, "\n") != strings.Trim(program, "\n") {
-			cleanedApps2 = append(cleanedApps2, app)
-		}
-	}
-	return cleanedApps2
+	sort.Strings(kept)
+	return kept
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"syscall"
+	"time"
 	"unsafe"
 
 	win "golang.org/x/sys/windows"
@@ -34,8 +35,8 @@ const (
 )
 
 // Applications returns the apps on the taskbar, except File Explorer, as a
-// map from app name to the handles of that app's windows.
-func Applications() (map[string][]uintptr, error) {
+// map from app name to that app's windows and process IDs.
+func Applications() (map[string]App, error) {
 	windows, err := topLevelWindows()
 	if err != nil {
 		return nil, err
@@ -44,11 +45,11 @@ func Applications() (map[string][]uintptr, error) {
 }
 
 // Close asks each window in handles to close, as if the user clicked its X
-// button, then waits up to closeTimeout for all of them to go away. A window
+// button, then waits up to timeout for all of them to go away. A window
 // that stays open, for example to ask the user to save, is left alone and
 // reported as an error.
-func Close(handles []uintptr) error {
-	return closeWindows(handles, postClose, windowExists, closeTimeout)
+func Close(handles []uintptr, timeout time.Duration) error {
+	return closeWindows(handles, postClose, windowExists, timeout)
 }
 
 // CloseExplorerWindows asks every File Explorer folder window to close. It
@@ -116,6 +117,7 @@ func readWindow(h win.HWND) window {
 
 	return window{
 		Handle:     uintptr(h),
+		PID:        int(pid),
 		Title:      windowText(h),
 		Class:      className(h),
 		Exe:        processExe(pid),
