@@ -51,3 +51,29 @@ homebrew_casks:
           on_macos do
             run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/lightsout"]
           end
+# Each release pushes a winget manifest to the fork
+# abhisheksinha1506/winget-pkgs and opens a pull request to
+# microsoft/winget-pkgs. GORELEASER_PAT must be able to push to the fork and
+# open that pull request (a classic token with the public_repo scope).
+winget:
+  - name: lightsout
+    publisher: Abhishek Sinha
+    package_identifier: AbhishekSinha.lightsout
+    short_description: Quit all open apps with one command, without force-killing.
+    license: MIT
+    homepage: https://github.com/abhisheksinha1506/lightsout
+    publisher_url: https://github.com/abhisheksinha1506
+    tags: [cli, productivity, windows]
+    commit_author:
+      name: abhisheksinha1506
+      email: abhisheksinha1506@gmail.com
+    repository:
+      owner: abhisheksinha1506
+      name: winget-pkgs
+      branch: "lightsout-{{ .Version }}"
+      pull_request:
+        enabled: true
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master

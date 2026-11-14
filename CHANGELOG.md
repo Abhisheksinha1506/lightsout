@@ -6,6 +6,11 @@ All notable changes to lightsout are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Each release opens a pull request to `microsoft/winget-pkgs` with the new
+  version's manifest, so Windows users can install and upgrade with winget.
+
 ## [1.1.2] - 2026-11-14
 
 ### Fixed
