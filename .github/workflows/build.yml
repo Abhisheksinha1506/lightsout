@@ -24,6 +24,21 @@ jobs:
         run: go test -count=1 -v -run TestRealNotepadIsListedAndCloses ./pkg/windows/
         env:
           LIGHTSOUT_WINDOWS_E2E: '1'
+      # A virtual X display (Xvfb) with a window manager (openbox), which
+      # wmctrl needs to list windows.
+      - name: Open and close an xterm with the real Linux code
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends xvfb openbox wmctrl x11-utils xterm
+          Xvfb :99 -screen 0 1280x1024x24 &
+          for _ in $(seq 1 50); do xprop -root >/dev/null 2>&1 && break; sleep 0.2; done
+          openbox &
+          for _ in $(seq 1 50); do wmctrl -m >/dev/null 2>&1 && break; sleep 0.2; done
+          go test -count=1 -v -run TestRealXtermIsListedAndCloses ./pkg/linux/
+        env:
+          DISPLAY: ':99'
+          LIGHTSOUT_LINUX_E2E: '1'
   docker-dev-lint:
     runs-on: ubuntu-latest
     steps:
