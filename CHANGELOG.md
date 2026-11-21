@@ -8,6 +8,33 @@ From v1.2.1 on, each release's notes are written from its commits and
 published on [GitHub Releases](https://github.com/abhisheksinha1506/lightsout/releases).
 This file covers the versions before that.
 
+## [1.2.1] - 2026-11-21
+
+### Fixed
+
+- The update check now reports GitHub errors as they are. A rate limit
+  (HTTP 403) used to show as "Latest release not found"; it now shows the
+  status GitHub answered with. Responses are always closed, and the 5 second
+  limit applies to the check's own HTTP client instead of changing the global
+  `http.DefaultClient`. (`pkg/version/version.go`)
+
+### Security
+
+- The update check no longer contacts Google. Release builds sent a
+  plain-HTTP request to `http://clients3.google.com/generate_204` on every run
+  before asking GitHub, which the README did not mention. lightsout now only
+  asks `https://api.github.com` for the latest release, and skips the check
+  silently when GitHub can't be reached. (`pkg/version/version.go`,
+  `pkg/version/version_test.go`)
+
+### Maintenance
+
+- Removed the `github.com/gleich/release` dependency, which made that request,
+  and its test-only `github.com/tj/assert` from `go.sum`. (`go.mod`, `go.sum`)
+- Added regression tests: the update check requests only the GitHub API URL,
+  and a non-200, empty or invalid GitHub answer is an error.
+  (`pkg/version/version_test.go`)
+
 ## [1.2.0] - 2026-11-14
 
 ### Added
@@ -152,6 +179,7 @@ First release.
 - Releases for macOS and Linux built with GoReleaser, a Homebrew cask, CI, and
   Dependabot.
 
+[1.2.1]: https://github.com/abhisheksinha1506/lightsout/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.4...v1.2.0
 [1.1.4]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.2...v1.1.3

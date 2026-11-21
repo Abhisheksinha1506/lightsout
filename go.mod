@@ -4,7 +4,6 @@ go 1.26.0
 
 require (
 	github.com/briandowns/spinner v1.23.2
-	github.com/gleich/release v0.0.0-20260101185753-7ee2ebc7de23
 	github.com/gleich/statuser/v2 v2.5.0
 	github.com/wayneashleyberry/truecolor v1.0.1
 	go.yaml.in/yaml/v3 v3.0.6
