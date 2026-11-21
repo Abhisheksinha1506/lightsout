@@ -1,12 +1,14 @@
 package version
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/gleich/release"
 	"github.com/gleich/statuser/v2"
 )
 
@@ -24,9 +26,15 @@ const devVersion = "dev"
 // updateCheckTimeout is the longest each update-check request may take.
 var updateCheckTimeout = 5 * time.Second
 
+const (
+	repoURL          = "https://github.com/abhisheksinha1506/lightsout"
+	latestReleaseURL = "https://api.github.com/repos/abhisheksinha1506/lightsout/releases/latest"
+)
+
 // CheckForUpdate checks GitHub for a newer release. Dev builds are not a
-// release, so they skip the check. A failed check only prints a warning so
-// that lightsout still runs when GitHub is unreachable or rate limited.
+// release, so they skip the check. A failed check never stops lightsout: if
+// GitHub can't be reached it is skipped silently, and if GitHub answered but
+// the check failed (for example rate limiting) it prints a warning.
 func CheckForUpdate() {
 	if Version == devVersion {
 		return
@@ -35,18 +43,14 @@ func CheckForUpdate() {
 	s := spinner.New(spinner.CharSets[13], 30*time.Millisecond)
 	s.Suffix = " Checking for update"
 	s.Start()
-
-	// release.Check uses http.Get, which has no timeout, so a stalled network
-	// would hang lightsout here. lightsout makes no other HTTP requests, so
-	// setting the default client's timeout is safe.
-	http.DefaultClient.Timeout = updateCheckTimeout
-
-	const repoURL = "https://github.com/abhisheksinha1506/lightsout"
-	// release.Check's own "outdated" answer is true whenever the versions
-	// differ, even when this build is newer, so only its latest version is used.
-	_, latest, err := release.Check(Version, repoURL)
+	latest, err := latestVersion(&http.Client{Timeout: updateCheckTimeout}, latestReleaseURL)
 	s.Stop()
-	if err != nil {
+
+	var unreachable *url.Error
+	switch {
+	case errors.As(err, &unreachable):
+		return
+	case err != nil:
 		statuser.Warning("Failed to check for update, skipping:", err)
 		return
 	}
@@ -55,4 +59,32 @@ func CheckForUpdate() {
 		fmt.Println("Get update from", repoURL, "or with your package manager")
 		fmt.Println()
 	}
+}
+
+// latestVersion asks the GitHub releases API at releaseURL for the latest
+// release and returns its tag (such as "v1.2.3").
+//
+// It returns a *url.Error if the server can't be reached or doesn't answer
+// in time, and another error if it answers with a status other than 200 or
+// with a body that has no tag.
+func latestVersion(client *http.Client, releaseURL string) (string, error) {
+	resp, err := client.Get(releaseURL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close() //nolint:errcheck // nothing to do if closing fails
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("GitHub answered %s", resp.Status)
+	}
+	var release struct {
+		TagName string `json:"tag_name"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", fmt.Errorf("invalid answer from GitHub: %w", err)
+	}
+	if release.TagName == "" {
+		return "", errors.New("GitHub's latest release has no tag")
+	}
+	return release.TagName, nil
 }
