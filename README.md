@@ -6,6 +6,8 @@
 
 <p>Quit all applications with one terminal command.</p>
 
+<p><a href="https://lightsout-cli.vercel.app"><strong>lightsout-cli.vercel.app</strong></a></p>
+
 <p>
   <a href="https://github.com/abhisheksinha1506/lightsout/releases/latest"><img src="https://img.shields.io/github/v/release/abhisheksinha1506/lightsout" alt="Latest release" /></a>
   <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml/badge.svg" alt="build" /></a>
