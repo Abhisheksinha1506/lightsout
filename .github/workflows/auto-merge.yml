@@ -1,5 +1,5 @@
-# Turns on auto-merge for Dependabot pull requests (patch and minor updates)
-# and for the repository owner's own pull requests. GitHub then merges each
+# Turns on auto-merge for Dependabot pull requests (Go module patch and minor
+# updates) and for the repository owner's own pull requests. GitHub then merges each
 # one by itself once the checks that main's branch protection requires pass.
 #
 # Nothing from the pull request is checked out or run here.
@@ -24,11 +24,17 @@ jobs:
       - name: Read the update type
         id: metadata
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-      # Major updates can break things, so they wait for a person.
+      # Only Go module patch and minor updates merge by themselves. Major
+      # updates, an unknown update type, and GitHub Actions or Docker image
+      # updates (which run inside CI, next to the release and deploy secrets)
+      # wait for a person.
       # Merged with GITHUB_TOKEN, so the merge starts no run on main: a
       # dependency update releases and deploys nothing by itself.
       - name: Enable auto-merge
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        if: >-
+          steps.metadata.outputs.package-ecosystem == 'go_modules' &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
