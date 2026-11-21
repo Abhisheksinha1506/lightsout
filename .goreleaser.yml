@@ -7,6 +7,46 @@ release:
   prerelease: auto
   # Release title, e.g. "lightsout v1.2.0"
   name_template: "{{ .ProjectName }} {{ .Tag }}"
+  # Appended to the notes generated from the commits (see changelog below).
+  footer: |
+    ### Install or upgrade
+
+    ```bash
+    brew install abhisheksinha1506/tap/lightsout
+    brew upgrade abhisheksinha1506/tap/lightsout
+    ```
+
+    On Windows, use Scoop:
+
+    ```powershell
+    scoop bucket add abhisheksinha1506 https://github.com/abhisheksinha1506/scoop-bucket
+    scoop install abhisheksinha1506/lightsout
+    ```
+
+    On Linux, install the `.deb` or `.rpm` package below. Or download the archive for your system below.
+    {{ if .PreviousTag }}
+    **Full changelog:** https://github.com/abhisheksinha1506/lightsout/compare/{{ .PreviousTag }}...{{ .Tag }}
+    {{ end }}
+# Release notes, built from the Conventional Commit subjects since the last
+# tag. Only user-facing changes are listed.
+changelog:
+  use: git
+  sort: asc
+  groups:
+    - title: Breaking changes
+      regexp: '^\w+(\(.+\))?!:'
+      order: 0
+    - title: Features
+      regexp: '^feat(\(.+\))?:'
+      order: 1
+    - title: Bug fixes
+      regexp: '^(fix|perf)(\(.+\))?:'
+      order: 2
+  filters:
+    include:
+      - '^\w+(\(.+\))?!:'
+      - '^feat(\(.+\))?:'
+      - '^(fix|perf)(\(.+\))?:'
 before:
   hooks:
     - go mod download

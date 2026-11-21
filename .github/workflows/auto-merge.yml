@@ -1,0 +1,55 @@
+# Turns on auto-merge for Dependabot pull requests (patch and minor updates)
+# and for the repository owner's own pull requests. GitHub then merges each
+# one by itself once the checks that main's branch protection requires pass.
+#
+# Nothing from the pull request is checked out or run here.
+name: auto-merge
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  dependabot:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Read the update type
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+      # Major updates can break things, so they wait for a person.
+      # Merged with GITHUB_TOKEN, so the merge starts no run on main: a
+      # dependency update releases and deploys nothing by itself.
+      - name: Enable auto-merge
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}
+
+  owner:
+    if: >-
+      github.event.pull_request.user.login == github.repository_owner &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    steps:
+      # Needs a personal access token: a merge made with GITHUB_TOKEN would not
+      # start the run on main that releases and deploys.
+      - name: Enable auto-merge
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::AUTOMERGE_PAT is not set, so this pull request is not merged automatically."
+            exit 0
+          fi
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.AUTOMERGE_PAT }}

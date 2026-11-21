@@ -22,7 +22,11 @@ full terminal output, and your config file if you have one.
    the issue number instead.
 3. Make your change. Add or update tests for any change in behavior.
 4. Run the checks below.
-5. Open a pull request that links the issue, and fill in the template.
+5. Open a pull request that links the issue, and fill in the template. Start
+   its title with a [Conventional Commits](https://www.conventionalcommits.org)
+   type, such as `feat: add --quiet` or `fix: keep Finder open`: the title
+   becomes the commit message, and `feat:` and `fix:` commits start a release
+   and appear in its notes.
 
 A maintainer will review it. Branches are deleted automatically after merging.
 
