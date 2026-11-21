@@ -10,9 +10,7 @@
 
 <p>
   <a href="https://github.com/abhisheksinha1506/lightsout/releases/latest"><img src="https://img.shields.io/github/v/release/abhisheksinha1506/lightsout" alt="Latest release" /></a>
-  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml/badge.svg" alt="build" /></a>
-  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml/badge.svg" alt="lint" /></a>
-  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml/badge.svg" alt="release" /></a>
+  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/ci-cd.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/ci-cd.yml/badge.svg" alt="ci-cd" /></a>
   <a href="https://codecov.io/gh/abhisheksinha1506/lightsout"><img src="https://codecov.io/gh/abhisheksinha1506/lightsout/graph/badge.svg" alt="Coverage" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/abhisheksinha1506/lightsout"><img src="https://api.scorecard.dev/projects/github.com/abhisheksinha1506/lightsout/badge" alt="OpenSSF Scorecard" /></a>
   <a href="https://pkg.go.dev/github.com/abhisheksinha1506/lightsout"><img src="https://pkg.go.dev/badge/github.com/abhisheksinha1506/lightsout.svg" alt="Go Reference" /></a>
@@ -275,11 +273,19 @@ open and close TextEdit, an xterm or Notepad, only run when
 
 ## Releasing
 
-First move the notes under "Unreleased" in [CHANGELOG.md](CHANGELOG.md) into a
-new section for the version, and commit that. Then push a tag such as
-`v1.1.0`. The release workflow first turns that CHANGELOG.md section into the
-release notes (`go run ./tools/releasenotes <tag>`), and stops before
-publishing anything if the section is missing. Then it runs GoReleaser, which:
+Releases are automatic. After every merge to `main`, once lint and all tests
+pass, the release job reads the commit messages since the last tag
+(`go run ./tools/nextversion`) and picks the next version:
+
+| Commits since the last release                     | New version     |
+| -------------------------------------------------- | --------------- |
+| a breaking change (`feat!:`, `BREAKING CHANGE:`)   | v1.2.0 → v2.0.0 |
+| a feature (`feat:`)                                | v1.2.0 → v1.3.0 |
+| a fix (`fix:`, `perf:`)                            | v1.2.0 → v1.2.1 |
+| only `docs:`, `ci:`, `chore:`, `build:`, `test:`   | no release      |
+
+It pushes that tag and runs GoReleaser, which writes the release notes from
+those `feat:` and `fix:` commits and:
 
 - builds the binaries and publishes them as a GitHub release, with those notes,
 - stamps the tag into each binary as its version, which the update check uses,
@@ -314,9 +320,13 @@ cosign verify-blob --bundle lightsout_1.2.0_checksums.txt.sigstore.json \
 The workflow needs a `GORELEASER_PAT` secret that can write to these
 repositories and open pull requests on `microsoft/winget-pkgs`.
 
+Pushing a `v*` tag by hand still releases that tag.
+
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for what changed in each release.
+See [GitHub Releases](https://github.com/abhisheksinha1506/lightsout/releases)
+for what changed in each release. [CHANGELOG.md](CHANGELOG.md) covers
+versions up to 1.2.0.
 
 ## Contributing
 

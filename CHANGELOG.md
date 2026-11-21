@@ -4,7 +4,9 @@ All notable changes to lightsout are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+From v1.2.1 on, each release's notes are written from its commits and
+published on [GitHub Releases](https://github.com/abhisheksinha1506/lightsout/releases).
+This file covers the versions before that.
 
 ## [1.2.0] - 2026-11-14
 
@@ -150,7 +152,6 @@ First release.
 - Releases for macOS and Linux built with GoReleaser, a Homebrew cask, CI, and
   Dependabot.
 
-[Unreleased]: https://github.com/abhisheksinha1506/lightsout/compare/v1.2.0...HEAD
 [1.2.0]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.4...v1.2.0
 [1.1.4]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/abhisheksinha1506/lightsout/compare/v1.1.2...v1.1.3
