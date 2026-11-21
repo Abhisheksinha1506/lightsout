@@ -1,0 +1,282 @@
+# One pipeline: lint, then tests, then deploy. Each stage starts only when
+# every job of the stage before it has passed.
+#
+#   lint ──> test ──> release      (tag pushes: GitHub release, Homebrew, Scoop, winget)
+#                 └─> deploy-site  (pushes to main: the website on Vercel)
+#
+# No integration-test stage: lightsout uses no database or other service.
+# The end-to-end tests open real apps (TextEdit, an xterm, Notepad) inside the
+# go-build job; there is no browser E2E suite.
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+    # Version tags such as v1.2.0 start a release.
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels that pull request's older run. Pushes
+# to main and tags each get their own group (the run id), so a deploy or
+# release is never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  #################################
+  # Stage 1: static analysis/lint #
+  #################################
+
+  golangci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - name: Run Golangci Linter
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          # Build golangci-lint with the Go set up above, so a new Go release
+          # can't make it fail to read the standard library. Bump this together
+          # with the golangci-lint image in dev.lint.Dockerfile.
+          install-mode: goinstall
+          version: v2.15.0
+
+  # Reports known vulnerabilities in the code paths lightsout actually calls.
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run govulncheck
+        uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1.1.0
+        with:
+          go-version-input: stable
+
+  gomod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - run: make lint-gomod
+
+  goreleaser-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Run Check
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: check
+
+  hadolint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Linting dev.lint.Dockerfile
+        uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
+        with:
+          dockerfile: 'dev.lint.Dockerfile'
+
+  in-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: make docker-lint
+
+  ##################################
+  # Stage 2: unit and end-to-end   #
+  ##################################
+
+  go-build:
+    needs: [golangci, govulncheck, gomod, goreleaser-check, hadolint, in-docker]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        # The oldest Go that go.mod allows, and the newest release.
+        go: [go.mod, stable]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ matrix.go != 'go.mod' && matrix.go || '' }}
+          go-version-file: ${{ matrix.go == 'go.mod' && 'go.mod' || '' }}
+      # go directly rather than make, which Windows runners don't always have
+      - run: go build -v ./...
+      - run: go test ./...
+      - name: Open and close Notepad with the real Windows code
+        if: runner.os == 'Windows' && matrix.go == 'stable'
+        run: go test -count=1 -v -run TestRealNotepadIsListedAndCloses ./pkg/windows/
+        env:
+          LIGHTSOUT_WINDOWS_E2E: '1'
+      - name: Open and quit TextEdit with the real macOS code
+        if: runner.os == 'macOS' && matrix.go == 'stable'
+        run: go test -count=1 -v -run TestRealTextEditIsListedAndQuits ./pkg/macos/
+        env:
+          LIGHTSOUT_MACOS_E2E: '1'
+      # A virtual X display (Xvfb) with a window manager (openbox), which
+      # wmctrl needs to list windows. All tests run again here with the
+      # end-to-end test on, to measure coverage of the real Linux code.
+      - name: Open and close an xterm with the real Linux code, with coverage
+        if: runner.os == 'Linux' && matrix.go == 'stable'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends xvfb openbox wmctrl x11-utils xterm
+          Xvfb :99 -screen 0 1280x1024x24 &
+          for _ in $(seq 1 50); do xprop -root >/dev/null 2>&1 && break; sleep 0.2; done
+          openbox &
+          for _ in $(seq 1 50); do wmctrl -m >/dev/null 2>&1 && break; sleep 0.2; done
+          go test -count=1 -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out | tail -1
+        env:
+          DISPLAY: ':99'
+          LIGHTSOUT_LINUX_E2E: '1'
+      - name: Upload coverage to Codecov
+        if: runner.os == 'Linux' && matrix.go == 'stable'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage.out
+          # Codecov needs this repository secret; until it is set the upload
+          # fails with a warning and CI carries on.
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  # Builds every release file without publishing, then installs the Linux
+  # packages the way users would.
+  packages:
+    needs: [golangci, govulncheck, gomod, goreleaser-check, hadolint, in-docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - name: Build a snapshot release
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --snapshot --clean --skip=publish,sign,sbom
+      - name: Install the .deb on Ubuntu
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ./dist/lightsout_*_linux_amd64.deb
+          lightsout --version
+          man -w lightsout
+          test -f /usr/share/bash-completion/completions/lightsout
+      - name: Install the .rpm on Fedora
+        run: |
+          docker run --rm -v "$PWD/dist:/dist" fedora:latest \
+            sh -c 'dnf install -y -q /dist/lightsout_*_linux_amd64.rpm && lightsout --version && test -f /usr/share/zsh/site-functions/_lightsout'
+
+  docker-dev-lint:
+    needs: [golangci, govulncheck, gomod, goreleaser-check, hadolint, in-docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: make build-docker-dev-lint
+
+  #####################
+  # Stage 3: deploy   #
+  #####################
+
+  # Publishes a release for a version tag (see "Releasing" in README.md).
+  # Releases stay tag-driven: a push to main has no version to publish.
+  release:
+    needs: [go-build, packages, docker-dev-lint]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    # Holds GORELEASER_PAT, so the lint and test jobs cannot read it.
+    environment: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Keyless cosign signatures and build provenance use GitHub's OIDC token.
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      # Fails the release, before anything is published, if CHANGELOG.md has
+      # no section for this tag.
+      - name: Write release notes from CHANGELOG.md
+        run: |
+          previous=$(git describe --tags --abbrev=0 "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          go run ./tools/releasenotes "$GITHUB_REF_NAME" "$previous" > "$RUNNER_TEMP/release-notes.md"
+      - name: Install cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+      - name: Install syft (for SBOMs)
+        uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+      - name: Run goreleaser
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean --release-notes ${{ runner.temp }}/release-notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GORELEASER_PAT }}
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/*.deb
+            dist/*.rpm
+            dist/*_checksums.txt
+
+  # Deploys site/ to production on Vercel (lightsout-cli.vercel.app).
+  deploy-site:
+    needs: [go-build, packages, docker-dev-lint]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Holds the VERCEL_* secrets, so the lint and test jobs cannot read them.
+    environment:
+      name: production
+      url: https://lightsout-cli.vercel.app
+    runs-on: ubuntu-latest
+    # One deploy at a time; a newer push to main waits for the running one.
+    concurrency:
+      group: deploy-site
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: site
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Deploy to Vercel
+        run: npx --yes vercel@65.12.1 deploy --prod --yes --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

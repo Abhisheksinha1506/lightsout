@@ -10,9 +10,7 @@
 
 <p>
   <a href="https://github.com/abhisheksinha1506/lightsout/releases/latest"><img src="https://img.shields.io/github/v/release/abhisheksinha1506/lightsout" alt="Latest release" /></a>
-  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/build.yml/badge.svg" alt="build" /></a>
-  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/lint.yml/badge.svg" alt="lint" /></a>
-  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/release.yml/badge.svg" alt="release" /></a>
+  <a href="https://github.com/abhisheksinha1506/lightsout/actions/workflows/ci-cd.yml"><img src="https://github.com/abhisheksinha1506/lightsout/actions/workflows/ci-cd.yml/badge.svg" alt="ci-cd" /></a>
   <a href="https://codecov.io/gh/abhisheksinha1506/lightsout"><img src="https://codecov.io/gh/abhisheksinha1506/lightsout/graph/badge.svg" alt="Coverage" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/abhisheksinha1506/lightsout"><img src="https://api.scorecard.dev/projects/github.com/abhisheksinha1506/lightsout/badge" alt="OpenSSF Scorecard" /></a>
   <a href="https://pkg.go.dev/github.com/abhisheksinha1506/lightsout"><img src="https://pkg.go.dev/badge/github.com/abhisheksinha1506/lightsout.svg" alt="Go Reference" /></a>
