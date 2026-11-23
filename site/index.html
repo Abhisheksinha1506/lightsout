@@ -317,6 +317,31 @@ footer nav { display: flex; gap: 22px; flex-wrap: wrap; }
 footer a { color: var(--ink-2); text-decoration: none; }
 footer a:hover { color: var(--ink); }
 
+/* ---------- badge marquee ---------- */
+.strip { padding: 0 0 100px; background: #0e1536; border-top: 1px solid #ffffff0d; overflow: hidden; }
+.strip .wrap { padding-top: 64px; }
+.strip h2 { text-align: center; font-size: clamp(26px, 3.2vw, 38px); margin-bottom: 40px; }
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.marquee-track {
+  display: flex; width: max-content;
+  animation: marquee 90s linear infinite;
+}
+.marquee:hover .marquee-track, .marquee:focus-within .marquee-track { animation-play-state: paused; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+.badges-once {
+  display: flex; align-items: center; gap: 14px; flex: none;
+  padding-right: 14px;
+}
+.badges-once a { display: flex; align-items: center; flex: none; }
+.badges-once img {
+  height: 46px; width: auto; max-width: 260px; max-height: 60px;
+  object-fit: contain; display: block;
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
   .hero { padding-top: 104px; min-height: 0; }
@@ -343,6 +368,8 @@ footer a:hover { color: var(--ink); }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .marquee { overflow-x: auto; }
+  .marquee-track { animation: none; }
   .js .term[data-play] .line { opacity: 1; transform: none; }
   .win { transition: none; }
   .term .cursor { animation: none; }
@@ -657,6 +684,68 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 </section>
+
+<section class="strip" aria-labelledby="strip-title">
+  <div class="wrap">
+    <h2 id="strip-title">Featured on</h2>
+    <div class="marquee">
+      <div class="marquee-track" id="marquee-track">
+        <div class="badges-once">
+          <a href="https://nicklaunches.com/products/lightsout/" target="_blank" rel="noopener"><img src="https://nicklaunches.com/badges/featured-dark.png" alt="lightsout on Nick Launches" width="244" height="56" loading="lazy"></a>
+          <a href="https://tools.launchllama.co/products/lightsout" target="_blank" rel="noopener noreferrer"><img src="https://tools.launchllama.co/featured-badge.png?v=2" alt="Launch Llama Tools" width="200" height="52" loading="lazy"></a>
+          <a href="https://www.verifiedtools.info/tools/lights-out" target="_blank" rel="noopener noreferrer"><img src="https://www.verifiedtools.info/badge.svg" alt="Lights out on Verified Tools — AI &amp; SaaS tools directory" width="200" height="54" loading="lazy"></a>
+          <a href="https://yo.directory" target="_blank" rel="dofollow noopener"><img src="https://assets.yo.directory/badges/yo-directory-featured-dark.svg" alt="Featured on Yo.directory" width="260" height="94" loading="lazy"></a>
+          <a href="https://launchpanda.dev/launches/productivity/lightsout" target="_blank" rel="noopener"><img src="https://launchpanda.dev/images/badges/launchpanda-badge-dark.svg" alt="Launched on LaunchPanda" width="260" height="64" loading="lazy"></a>
+          <a href="https://launchleague.xyz/?product=lightsout" target="_blank"><img src="https://cdn.launchleague.xyz/site-images/badges/badge-dark.svg" alt="LaunchLeague Badge" width="300" height="66" loading="lazy"></a>
+          <a href="https://toolhunter.ai/ai-tool/lightsout?ref=badge" target="_blank" rel="noopener"><img src="https://toolhunter.ai/badge/lightsout.svg?theme=dark" alt="Featured on Toolhunter" width="200" height="50" loading="lazy"></a>
+          <a href="https://launchstreak.dev/dev-tools/lightsout" target="_blank" rel="noopener"><img src="https://launchstreak.dev/badge/launch-streak-badge-light.svg" alt="Launched on Launch Streak" width="248" height="68" loading="lazy"></a>
+          <a href="https://goodaitools.com/ai/lightsout-cli-vercel" target="_blank" rel="noopener"><img src="https://goodaitools.com/assets/images/badge-dark.png" alt="Good AI Tools" height="54" loading="lazy"></a>
+          <a href="https://sumodir.com" target="_blank" rel="dofollow"><img src="https://sumodir.com/badge.png" alt="Featured on SumoDir" width="200" height="54" loading="lazy"></a>
+          <a href="https://marketingdb.live" target="_blank" rel="noopener"><img src="https://marketingdb.live/badge.svg" alt="Launched on MarketingDB" width="190" height="44" loading="lazy"></a>
+          <a href="https://wayfindio.com" target="_blank"><img src="https://wayfindio.com/badge/badge_light.svg" alt="Featured on Wayfindio" width="200" height="54" loading="lazy"></a>
+          <a href="https://toolfio.com/item/lightsout" target="_blank" rel="noopener"><img src="https://toolfio.com/toolfio-light-badge.png" alt="Featured on Toolfio" width="200" height="54" loading="lazy"></a>
+          <a href="https://startuptrusted.com?ref=lightsout-cli.vercel.app" target="_blank" rel="noopener"><img src="https://startuptrusted.com/api/badge?type=top&style=light" alt="lightsout — quit every open app with one command on StartupTrusted" width="240" height="54" loading="lazy"></a>
+          <a href="https://toolfame.com/" target="_blank" rel="noopener noreferrer"><img src="https://toolfame.com/badge-light.svg" alt="Featured on toolfame.com" height="54" loading="lazy"></a>
+          <a href="https://saasfame.com/" target="_blank" rel="noopener noreferrer"><img src="https://saasfame.com/badge-light.svg" alt="Featured on saasfame.com" height="54" loading="lazy"></a>
+          <a href="https://dododirectory.com" target="_blank" rel="dofollow"><img src="https://dododirectory.com/badge-light.png" alt="Featured on DodoDirectory" width="200" height="54" loading="lazy"></a>
+          <a href="https://newtool.site/item/lightsout?utm_source=lightsout-cli.vercel.app" target="_blank" rel="noopener"><img src="https://newtool.site/badges/newtool-dark.svg" alt="Featured on NewTool.site" height="54" loading="lazy"></a>
+          <a href="https://cloutstack.net/" target="_blank" rel="noopener"><img src="https://cloutstack.net/badge/badge.png" alt="Featured on CloutStack" height="54" loading="lazy"></a>
+          <a href="https://launchpadly.co/startup/lightsout?ref=badge" target="_blank" rel="noopener noreferrer" data-launchpadly-badge="lightsout" data-launchpadly-badge-variant="listed-on"><img src="https://launchpadly.co/embed/badges/startup/lightsout.svg?variant=listed-on" alt="Launchpadly Startup Directory" width="260" height="48" loading="lazy"></a>
+          <a href="https://www.tinyshelf.co/?ref=lightsout-cli.vercel.app" title="Featured on TinyShelf" target="_blank" rel="noopener"><img src="https://www.tinyshelf.co/badge/tinyshelf-badge-light-amber-1cdea1ce.svg" alt="Featured on TinyShelf" width="216" height="64" loading="lazy"></a>
+          <a href="https://uno.directory" target="_blank" rel="noopener"><img src="https://uno.directory/uno-directory.svg" alt="Listed on Uno Directory" width="120" height="30" loading="lazy"></a>
+          <a href="https://saasbison.com" target="_blank" rel="dofollow"><img src="https://saasbison.com/badge.png" alt="Featured on SaaSBison" width="200" height="54" loading="lazy"></a>
+          <a href="https://publishyoursaas.com/listing/lightsout-cli-vercel-app" target="_blank" rel="noopener" data-publishyoursaas-badge="lightsout-cli-vercel-app"><img src="https://publishyoursaas.com/publishyoursaas-badge.svg" alt="lightsout is listed on publishyoursaas" width="240" height="60" loading="lazy"></a>
+          <a href="https://easydofollow.dev/saas/lightsout" target="_blank" rel="noopener"><img src="https://easydofollow.dev/badge/easydofollow-badge-light.svg" alt="Featured on EasyDoFollow" width="188" height="56" loading="lazy"></a>
+          <a href="https://easylaunch.dev/saas/lightsout" target="_blank" rel="noopener"><img src="https://easylaunch.dev/badge/easylaunch-badge-light.svg" alt="Featured on EasyLaunch" width="188" height="56" loading="lazy"></a>
+          <a href="https://lemonlaunch.dev/saas/lightsout" target="_blank" rel="noopener"><img src="https://lemonlaunch.dev/badge/lemonlaunch-badge-light.svg" alt="Featured on LemonLaunch" width="188" height="56" loading="lazy"></a>
+          <a href="https://buildlist.io" target="_blank" rel="noopener"><img src="https://buildlist.io/badge-dark.svg" alt="Featured on Buildlist" height="40" loading="lazy"></a>
+          <a href="https://launchboard.dev" target="_blank" rel="noopener"><img src="https://launchboard.dev/launchboard-badge.png" alt="Launched on LaunchBoard - Product Launch Platform" width="240" height="60" loading="lazy"></a>
+          <a href="https://www.listbulb.com/tools/lightsout-cli" target="_blank" rel="noopener"><img src="https://www.listbulb.com/featured-on-listbulb-dark.svg" alt="Featured on ListBulb" height="240" loading="lazy"></a>
+          <a href="https://www.launchit.site/launches/lightsout" target="_blank" rel="noopener"><img src="https://www.launchit.site/badges/launchit-dark.svg" alt="lightsout - Featured on Launchit" width="200" height="54" loading="lazy"></a>
+          <a href="https://ufind.best/products/lightsout" target="_blank" rel="noopener"><img src="https://ufind.best/badges/ufind-best-badge-dark.svg" alt="Featured on ufind.best" width="150" loading="lazy"></a>
+          <a href="https://www.launchvault.dev" target="_blank" rel="noopener"><img src="https://www.launchvault.dev/images/badges/launch-valut-badge.svg" alt="Feature On Launch Vault" width="195" loading="lazy"></a>
+          <a href="https://smollaunch.com" target="_blank" rel="noopener"><img src="https://smollaunch.com/badges/featured-dark.svg" alt="lightsout — Featured on Smol Launch" width="250" height="60" loading="lazy"></a>
+          <a href="https://lift-off.sh/p/lightsout" target="_blank" rel="noopener"><img src="https://lift-off.sh/images/badges/badgeLaunchedLight.webp" alt="lightsout on LiftOff Badge" width="200" loading="lazy"></a>
+          <a href="https://www.codehype.ai/product/lightsout?utm_source=codehype_badge" target="_blank" rel="noopener noreferrer"><img src="https://www.codehype.ai/badges/lightsout.svg?variant=find-us&amp;v=20" alt="Featured on CodeHype" width="180" height="65" loading="lazy"></a>
+          <a href="https://turbo0.com/item/lightsout" target="_blank" rel="noopener noreferrer"><img src="https://img.turbo0.com/badge-listed-light.svg" alt="Listed on Turbo0" height="54" loading="lazy"></a>
+          <a href="https://launchigniter.com/product/lightsout?ref=badge-lightsout" target="_blank"><img src="https://launchigniter.com/api/badge/lightsout?theme=dark" alt="Featured on LaunchIgniter" width="212" height="55" loading="lazy"></a>
+          <a href="https://launchkiwi.com/p/lightsout" target="_blank" rel="noopener"><img src="https://launchkiwi.com/badge-dark.svg" alt="Featured on LaunchKiwi" width="198" height="62" loading="lazy"></a>
+          <a href="https://launchnest.io/p/lightsout" target="_blank"><img src="https://launchnest.io/badge/lightsout.svg?variant=featured" alt="lightsout on LaunchNest" width="220" height="56" loading="lazy"></a>
+          <a href="https://daniellaunches.com" target="_blank"><img src="https://daniellaunches.com/badge-light.svg" alt="Featured on DanielLaunches" width="220" height="48" loading="lazy"></a>
+          <a href="https://saascubes.com" target="_blank" rel="noopener"><img src="https://saascubes.com/images/badges/badge-light.png" alt="Listed on SaaS Cubes" width="175" height="54" loading="lazy"></a>
+          <a href="https://devhub.best/projects/lightsout?utm_source=badge" target="_blank" rel="noopener noreferrer"><img src="https://r2.direasy-multi-tenant.focusapps.app/uploads/616d0b1a-3979-4b8c-94d1-b4f1fedd3ead/1783239702078/53yqmim54zv/featured-on-light.svg" alt="Featured on DevHub" height="44" loading="lazy"></a>
+          <a href="https://bestsky.tools?utm_source=badge" target="_blank" rel="noopener"><img src="https://assets.bestsky.tools/badges/featured-light.svg" alt="Featured on BestskyTools" width="150" loading="lazy"></a>
+          <a href="https://listmysaas.xyz" target="_blank" rel="noopener"><img src="https://listmysaas.xyz/listmysaasbadgenormal.svg" alt="Featured on ListMySaaS" width="125" height="44" loading="lazy"></a>
+          <a href="https://neeed.directory" target="_blank" rel="noopener"><img src="https://neeed.directory/badges/neeed-badge-light.svg" alt="Featured on neeed.directory" width="139" loading="lazy"></a>
+          <a href="https://bricklaun.ch/saas/lightsout" target="_blank" rel="noopener"><img src="https://bricklaun.ch/badge/brick-launch-badge-a-light.svg" alt="Featured on Brick Launch" width="140" height="54" loading="lazy"></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://elbgaoekhyokkcovbzuz.supabase.co/functions/v1/widget-js?product=lightsout-quit-every-open-app-with-one-command&amp;variant=featured&amp;theme=light&amp;size=md"></script>
+
 </main>
 
 <footer>
@@ -739,6 +828,16 @@ footer a:hover { color: var(--ink); }
     terms.forEach(t => io.observe(t));
   } else {
     terms.forEach(t => t.classList.add("played"));
+  }
+
+  // Badge marquee: clone the list once so the loop is seamless.
+  const marqueeTrack = document.getElementById("marquee-track");
+  if (marqueeTrack) {
+    const once = marqueeTrack.querySelector(".badges-once");
+    const clone = once.cloneNode(true);
+    clone.setAttribute("aria-hidden", "true");
+    clone.querySelectorAll("a").forEach(a => a.setAttribute("tabindex", "-1"));
+    marqueeTrack.appendChild(clone);
   }
 
   // Copy buttons.
