@@ -16,12 +16,6 @@
   <a href="https://pkg.go.dev/github.com/abhisheksinha1506/lightsout"><img src="https://pkg.go.dev/badge/github.com/abhisheksinha1506/lightsout.svg" alt="Go Reference" /></a>
 </p>
 
-<p>
-  <a href="https://launchstall.com" target="_blank" rel="noopener"><img src="https://launchstall.com/badge.svg" alt="Featured on LaunchStall" height="44" /></a>
-  &nbsp;
-  <a href="https://megalaun.ch/" target="_blank" rel="noopener"><img src="https://megalaun.ch/badges/featured/asset" alt="Featured on MegaLaunch" height="44" /></a>
-</p>
-
 </div>
 
 lightsout asks every open desktop application on macOS, Linux or Windows to

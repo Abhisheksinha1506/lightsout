@@ -129,8 +129,6 @@ h1 .out { color: var(--glow); }
 .copy svg { width: 16px; height: 16px; }
 .alt { margin: 16px 0 0; font-size: 15px; color: var(--ink-3); }
 .alt a { color: var(--ink-2); }
-.badges { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; align-items: center; }
-.badges img { height: 44px; width: auto; display: block; }
 
 /* the building: each lit window is an open app */
 .tower {
@@ -364,7 +362,6 @@ footer a:hover { color: var(--ink); }
   .floors { gap: 9px 10px; }
   .tower { padding: 20px 16px 0; }
   .win span { font-size: 9px; }
-  .badges img { height: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -419,10 +416,6 @@ footer a:hover { color: var(--ink); }
         </button>
       </div>
       <p class="alt">Windows: <a href="#install">Scoop or a download</a> · Linux: <a href="#install">.deb, .rpm or Homebrew</a> · Free and MIT-licensed</p>
-      <div class="badges">
-        <a href="https://launchstall.com" target="_blank" rel="noopener"><img src="https://launchstall.com/badge.svg" alt="Featured on LaunchStall" height="44"></a>
-        <a href="https://megalaun.ch/" target="_blank" rel="noopener"><img src="https://megalaun.ch/badges/featured/asset" alt="Featured on MegaLaunch" height="44"></a>
-      </div>
     </div>
 
     <div class="tower" aria-label="Illustration: a building where each lit window is an open app. When lightsout runs, every window goes dark except the terminal's.">
@@ -691,6 +684,8 @@ footer a:hover { color: var(--ink); }
     <div class="marquee">
       <div class="marquee-track" id="marquee-track">
         <div class="badges-once">
+          <a href="https://launchstall.com" target="_blank" rel="noopener"><img src="https://launchstall.com/badge.svg" alt="Featured on LaunchStall" height="44" loading="lazy"></a>
+          <a href="https://megalaun.ch/" target="_blank" rel="noopener"><img src="https://megalaun.ch/badges/featured/asset" alt="Featured on MegaLaunch" height="44" loading="lazy"></a>
           <a href="https://nicklaunches.com/products/lightsout/" target="_blank" rel="noopener"><img src="https://nicklaunches.com/badges/featured-dark.png" alt="lightsout on Nick Launches" width="244" height="56" loading="lazy"></a>
           <a href="https://tools.launchllama.co/products/lightsout" target="_blank" rel="noopener noreferrer"><img src="https://tools.launchllama.co/featured-badge.png?v=2" alt="Launch Llama Tools" width="200" height="52" loading="lazy"></a>
           <a href="https://www.verifiedtools.info/tools/lights-out" target="_blank" rel="noopener noreferrer"><img src="https://www.verifiedtools.info/badge.svg" alt="Lights out on Verified Tools — AI &amp; SaaS tools directory" width="200" height="54" loading="lazy"></a>
