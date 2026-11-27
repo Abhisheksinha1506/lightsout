@@ -1,6 +1,6 @@
 # Tool images, pinned by tag so Dependabot can keep them up to date.
 FROM hadolint/hadolint:v2.15.1 AS hadolint
-FROM goreleaser/goreleaser:v2.20.2 AS goreleaser
+FROM goreleaser/goreleaser:v2.20.3 AS goreleaser
 
 # golangci-lint image: Go, golangci-lint, git and make.
 FROM golangci/golangci-lint:v2.15.0
